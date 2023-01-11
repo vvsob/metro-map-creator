@@ -292,11 +292,13 @@ class MetroMapDrawer:
                 draw.line(moved_coords1, mid)
                 draw(metro_map_image)
 
+            with Drawing() as draw:
                 draw.stroke_color = color2
                 draw.stroke_width = 9
                 draw.line(moved_coords2, mid)
                 draw(metro_map_image)
 
+            with Drawing() as draw:
                 draw.stroke_color = Color('white')
                 draw.stroke_width = 3
                 if mcd1:
@@ -312,9 +314,9 @@ class MetroMapDrawer:
             dist = length(sub(moved_coords1, moved_coords2))
             count = max(2, int(round(dist) / 6 + 0.5))
 
-            delta = dist / count
+            step = dist / count
 
-            cur_coord = move_point(moved_coords1, moved_coords2, (dist - delta * (count - 2)) / 2)
+            cur_coord = move_point(moved_coords1, moved_coords2, (dist - step * (count - 2)) / 2)
 
             for i in range(count - 1):
                 with Drawing() as draw:
@@ -322,7 +324,7 @@ class MetroMapDrawer:
                     draw.fill_color = draw.stroke_color
                     draw.circle(cur_coord, add(cur_coord, (0.75, 0)))
                     draw(metro_map_image)
-                    cur_coord = move_point(cur_coord, moved_coords2, delta)
+                    cur_coord = move_point(cur_coord, moved_coords2, step)
 
     def get_metro_map(self):
         metro_map_image = Image(height=self._map_data["image_resolution"][0],
@@ -332,11 +334,11 @@ class MetroMapDrawer:
         for line in sorted(self._map_data["lines"], key=cmp_to_key(cmp)):
             stations_centers.update(self.draw_line(line, metro_map_image))
 
-        for line in self._map_data["lines"]:
-            self.draw_line_stations_names(metro_map_image, line, stations_centers, self._map_data['font_filename'])
-
         for transfer in self._map_data["transfers"]:
             self.draw_transfer(metro_map_image, transfer, stations_centers)
+
+        for line in self._map_data["lines"]:
+            self.draw_line_stations_names(metro_map_image, line, stations_centers, self._map_data['font_filename'])
 
         self.draw_lines_info(metro_map_image)
 
