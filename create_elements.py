@@ -93,12 +93,12 @@ def get_station(line, orientation):
 def get_transfer(line, mcd, orientation):
     transfer = line.clone()
     transfer.virtual_pixel = 'transparent'
-    if mcd:
-        transfer.resize(44, transfer.height + 1)
+    if not mcd:
+        transfer.resize(64, transfer.height)
         transfer.distort('arc', (360, 0))
-        transfer.resize(25, 25)
+        transfer.resize(27, 27)
     else:
-        transfer.resize(70, transfer.height)
+        transfer.resize(44, transfer.height + 1)
         transfer.distort('arc', (360, 0))
         transfer.resize(29, 29)
 
@@ -111,14 +111,16 @@ def get_transfer(line, mcd, orientation):
     base.composite(transfer)
 
     line_part = line.clone()
-    line_part.resize(width=4)
-    line_part_base = Image(width=5, height=line.height)
+    line_part.resize(width=3)
+    line_part_base = Image(width=6, height=line.height)
     line_part_base.virtual_pixel = 'transparent'
     line_part_base.composite(line_part)
 
     for i in range(line_part_base.height):
         if 3 <= i < 6:
+            line_part_base[3, i] = line[0, i]
             line_part_base[4, i] = line[0, i]
+            line_part_base[5, i] = line[0, i]
 
     if orientation.name in [Orientation.HORIZONTAL.name, Orientation.VERTICAL.name]:
         base.composite(line_part_base, top=(base.height-line.height)//2)

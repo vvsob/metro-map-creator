@@ -248,6 +248,82 @@ class MetroMapDrawer:
         metro_map_image.composite(info_img, left=metro_map_image.width - info_img.width,
                                   top=metro_map_image.height - info_img.height)
 
+    def draw_transfer(self, metro_map_image, transfer, stations_centers):
+        def add(point1, point2):
+            return point1[0] + point2[0], point1[1] + point2[1]
+
+        def sub(point1, point2):
+            return add(point1, (-point2[0], -point2[1]))
+
+        def mult(point, number):
+            return point[0] * number, point[1] * number
+
+        def length(point):
+            return (point[0] ** 2 + point[1] ** 2) ** 0.5
+
+        def move_point(point, to_point, delta):
+            dv = sub(to_point, point)
+            dv = mult(dv, delta / length(dv))
+            return add(point, dv)
+
+        color1 = None
+        color2 = None
+        mcd1 = False
+        mcd2 = False
+        for line in self._map_data['lines']:
+            if line['name'] == transfer['station1']['line_name']:
+                color1 = MetroMapDrawer.get_line_img(line)[0, 0]
+                mcd1 = line['type'] == "mcd"
+            if line['name'] == transfer['station2']['line_name']:
+                color2 = MetroMapDrawer.get_line_img(line)[0, 0]
+                mcd2 = line['type'] == "mcd"
+
+        coords1 = tuple(stations_centers[(transfer["station1"]["line_name"], transfer["station1"]["station_name"])])
+        coords2 = tuple(stations_centers[(transfer["station2"]["line_name"], transfer["station2"]["station_name"])])
+        mid = mult(add(coords1, coords2), 0.5)
+
+        if transfer['direct']:
+            moved_coords1 = move_point(coords1, mid, 10)
+            moved_coords2 = move_point(coords2, mid, 10)
+
+            with Drawing() as draw:
+                draw.stroke_color = color1
+                draw.stroke_width = 9
+                draw.line(moved_coords1, mid)
+                draw(metro_map_image)
+
+                draw.stroke_color = color2
+                draw.stroke_width = 9
+                draw.line(moved_coords2, mid)
+                draw(metro_map_image)
+
+                draw.stroke_color = Color('white')
+                draw.stroke_width = 3
+                if mcd1:
+                    coords1 = move_point(coords1, mid, 7)
+                if mcd2:
+                    coords2 = move_point(coords2, mid, 7)
+                draw.line(coords1, coords2)
+                draw(metro_map_image)
+        else:
+            moved_coords1 = move_point(coords1, mid, 12.5 + mcd1)
+            moved_coords2 = move_point(coords2, mid, 12.5 + mcd2)
+
+            dist = length(sub(moved_coords1, moved_coords2))
+            count = max(2, int(round(dist) / 6 + 0.5))
+
+            delta = dist / count
+
+            cur_coord = move_point(moved_coords1, moved_coords2, (dist - delta * (count - 2)) / 2)
+
+            for i in range(count - 1):
+                with Drawing() as draw:
+                    draw.stroke_color = Color("rgb(134, 164, 193)")
+                    draw.fill_color = draw.stroke_color
+                    draw.circle(cur_coord, add(cur_coord, (0.75, 0)))
+                    draw(metro_map_image)
+                    cur_coord = move_point(cur_coord, moved_coords2, delta)
+
     def get_metro_map(self):
         metro_map_image = Image(height=self._map_data["image_resolution"][0],
                                 width=self._map_data["image_resolution"][1], background=Color('white'))
@@ -256,10 +332,13 @@ class MetroMapDrawer:
         for line in sorted(self._map_data["lines"], key=cmp_to_key(cmp)):
             stations_centers.update(self.draw_line(line, metro_map_image))
 
-        self.draw_lines_info(metro_map_image)
-
         for line in self._map_data["lines"]:
             self.draw_line_stations_names(metro_map_image, line, stations_centers, self._map_data['font_filename'])
+
+        for transfer in self._map_data["transfers"]:
+            self.draw_transfer(metro_map_image, transfer, stations_centers)
+
+        self.draw_lines_info(metro_map_image)
 
         self.draw_info(metro_map_image)
 

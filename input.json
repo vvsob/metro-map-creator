@@ -112,7 +112,7 @@
                 0
             ],
             "start": [
-                740,
+                739,
                 230
             ],
             "direction": "down",
@@ -187,6 +187,19 @@
                     "name_relative_to": "down"
                 }
             ]
+        }
+    ],
+    "transfers": [
+        {
+            "station1": {
+                "line_name": "Городская",
+                "station_name": "Беговая"
+            },
+            "station2": {
+                "line_name": "Беговая",
+                "station_name": "Беговая"
+            },
+            "direct": true
         }
     ]
 }

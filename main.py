@@ -1,6 +1,7 @@
 import json
+import os
 
-from metro_map_drawer import *
+from metro_map_drawer import MetroMapDrawer
 
 
 map_data = json.loads(open('input.json', 'r').read())
