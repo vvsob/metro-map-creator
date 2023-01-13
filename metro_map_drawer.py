@@ -61,8 +61,8 @@ class MetroMapDrawer:
         else:
             end_station = get_transfer(station_img, mcd, Orientation[direction.upper()])
 
-        station_center = place(metro_map_image, end_station, position, RelativeTo[opposite(direction.upper())])
-        move_by_img(position, end_station, direction)
+        station_center = place(metro_map_image, end_station, position, RelativeTo.CENTER)
+        move(position, station_img.height // 2 + 1, Direction[direction.upper()])
 
         return station_center
 
@@ -195,7 +195,7 @@ class MetroMapDrawer:
 
         stations_centers = {}
 
-        end_station_length = get_end_station(line_img, Orientation.RIGHT).width
+        line_width = line_img.height
         station_length = get_station(line_img, Orientation.UP).width
         transfer_length = get_transfer(line_img, mcd, Orientation.RIGHT).width
         turn_length = get_arc(line_img, Turn.RIGHT_DOWN).width
@@ -209,23 +209,16 @@ class MetroMapDrawer:
                 if num != 0:
                     prev_type = line['elements'][num - 1]['type']
                     if prev_type in ['station', 'transfer']:
-                        if num == 1:
-                            line_length -= end_station_length if prev_type == 'station' else transfer_length
-                        else:
-                            line_length -= station_length // 2 if prev_type == 'station' else transfer_length // 2
+                        line_length -= station_length // 2 + 1 if prev_type == 'station' else transfer_length // 2 + 1
                     elif prev_type == 'turn':
-                        line_length -= turn_length
+                        line_length -= turn_length - line_width // 2
 
                 if num != len(line['elements']) - 1:
                     next_type = line['elements'][num + 1]['type']
                     if next_type in ['station', 'transfer']:
-                        if num == len(line['elements']) - 2:
-                            line_length -= end_station_length if next_type == 'station' else transfer_length
-                        else:
-                            line_length -= station_length // 2 + 1 if next_type == 'station' \
-                                else transfer_length // 2 + 1
+                        line_length -= station_length // 2 if next_type == 'station' else transfer_length // 2
                     elif next_type == 'turn':
-                        line_length -= turn_length
+                        line_length -= turn_length - line_width // 2 - 1
 
                 if line_length < 0:
                     raise Exception('Line segment is too short')
