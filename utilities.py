@@ -65,12 +65,3 @@ def move_by_img(coords, img, direction):
         return move(coords, img.width, Direction[direction.upper()])
     else:
         return move(coords, img.height, Direction[direction.upper()])
-
-
-def continue_line(coords, img, line_img, delta, direction):
-    line_part = line_img.clone()
-    line_part.resize(delta, line_part.height)
-    if direction in ['up', 'down']:
-        line_part.rotate(90)
-    place(img, line_part, coords, RelativeTo[opposite(direction.upper())])
-    move(coords, delta, Direction[direction.upper()])

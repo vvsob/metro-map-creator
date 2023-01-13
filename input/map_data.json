@@ -1,7 +1,7 @@
 {
     "image_resolution": [
-        1024,
-        1024
+        768,
+        768
     ],
     "info_filename": "info.png",
     "font_filename": "Calibri Regular.ttf",
@@ -14,22 +14,72 @@
             "type": "metro",
             "priority": 1,
             "start_logo_offset": [
-                0,
-                30
+                -30,
+                0
             ],
             "end_logo_offset": [
                 -30,
                 0
             ],
             "start": [
-                512,
-                768
+                320,
+                634
             ],
-            "direction": "up",
+            "direction": "right",
             "elements": [
                 {
                     "type": "station",
+                    "name": "Горная",
+                    "name_offset": [
+                        0,
+                        20
+                    ],
+                    "name_relative_to": "up",
+                    "planned": true
+                },
+                {
+                    "type": "line",
+                    "length": 100
+                },
+                {
+                    "type": "turn",
+                    "direction": "up"
+                },
+                {
+                    "type": "line",
+                    "length": 10
+                },
+                {
+                    "type": "station",
                     "name": "Кунцевская",
+                    "orientation": "right",
+                    "name_offset": [
+                        20,
+                        0
+                    ],
+                    "name_relative_to": "left"
+                },
+                {
+                    "type": "line",
+                    "length": 150
+                },
+                {
+                    "type": "transfer",
+                    "name": "Беговая",
+                    "name_offset": [
+                        20,
+                        0
+                    ],
+                    "name_relative_to": "left"
+                },
+                {
+                    "type": "line",
+                    "length": 80
+                },
+                {
+                    "type": "station",
+                    "name": "Саранский бульвар",
+                    "orientation": "left",
                     "name_offset": [
                         -20,
                         0
@@ -37,30 +87,12 @@
                     "name_relative_to": "right"
                 },
                 {
-                    "type": "transfer",
-                    "name": "Беговая",
-                    "offset": 150,
-                    "name_offset": [
-                        20,
-                        0
-                    ],
-                    "name_relative_to": "left"
-                },
-                {
-                    "type": "station",
-                    "name": "Саранский бульвар",
-                    "offset": 80,
-                    "orientation": "right",
-                    "name_offset": [
-                        20,
-                        0
-                    ],
-                    "name_relative_to": "left"
+                    "type": "line",
+                    "length": 120
                 },
                 {
                     "type": "station",
                     "name": "Советская",
-                    "offset": 120,
                     "orientation": "right",
                     "name_offset": [
                         20,
@@ -69,14 +101,20 @@
                     "name_relative_to": "left"
                 },
                 {
+                    "type": "line",
+                    "length": 50
+                },
+                {
                     "type": "turn",
-                    "direction": "left",
-                    "offset": 50
+                    "direction": "left"
+                },
+                {
+                    "type": "line",
+                    "length": 100
                 },
                 {
                     "type": "station",
                     "name": "Библиотека\nим. Акимова",
-                    "offset": 100,
                     "orientation": "down",
                     "name_offset": [
                         0,
@@ -85,9 +123,12 @@
                     "name_relative_to": "up"
                 },
                 {
+                    "type": "line",
+                    "length": 150
+                },
+                {
                     "type": "station",
                     "name": "Баррикадная",
-                    "offset": 100,
                     "name_offset": [
                         0,
                         -20
@@ -112,8 +153,8 @@
                 0
             ],
             "start": [
-                739,
-                230
+                629,
+                60
             ],
             "direction": "down",
             "elements": [
@@ -127,9 +168,12 @@
                     "name_relative_to": "left"
                 },
                 {
+                    "type": "line",
+                    "length": 150
+                },
+                {
                     "type": "station",
                     "name": "Крымская",
-                    "offset": 150,
                     "orientation": "right",
                     "name_offset": [
                         20,
@@ -138,14 +182,20 @@
                     "name_relative_to": "left"
                 },
                 {
+                    "type": "line",
+                    "length": 150
+                },
+                {
                     "type": "turn",
-                    "direction": "left",
-                    "offset": 150
+                    "direction": "left"
+                },
+                {
+                    "type": "line",
+                    "length": 50
                 },
                 {
                     "type": "station",
                     "name": "Курская",
-                    "offset": 100,
                     "orientation": "up",
                     "name_offset": [
                         0,
@@ -154,10 +204,13 @@
                     "name_relative_to": "down"
                 },
                 {
+                    "type": "line",
+                    "length": 100
+                },
+                {
                     "type": "transfer",
                     "name": "Беговая",
                     "hide_name": true,
-                    "offset": 100,
                     "name_offset": [
                         0,
                         0
@@ -165,9 +218,26 @@
                     "name_relative_to": "center"
                 },
                 {
+                    "type": "line",
+                    "length": 100
+                },
+                {
                     "type": "station",
                     "name": "Белорусская",
-                    "offset": 100,
+                    "orientation": "up",
+                    "name_offset": [
+                        0,
+                        -20
+                    ],
+                    "name_relative_to": "down"
+                },
+                {
+                    "type": "line",
+                    "length": 100
+                },
+                {
+                    "type": "station",
+                    "name": "Киевская",
                     "orientation": "down",
                     "name_offset": [
                         0,
@@ -176,9 +246,12 @@
                     "name_relative_to": "up"
                 },
                 {
+                    "type": "line",
+                    "length": 100
+                },
+                {
                     "type": "station",
-                    "name": "Киевская",
-                    "offset": 100,
+                    "name": "Имени Плеханова",
                     "orientation": "up",
                     "name_offset": [
                         0,

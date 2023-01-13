@@ -132,14 +132,17 @@ def get_transfer(line, mcd, orientation):
     return base
 
 
-def get_text_image(text, img, font_filename):
+def get_text_image(text, img, font_filename, font_color=Color('black'), background_color=Color('#FFFFFF80')):
+    padding_size = (5, 3)
+
     draw = Drawing()
-    draw.font = os.path.join('fonts', font_filename)
+    draw.fill_color = font_color
+    draw.font = os.path.join('input', 'fonts', font_filename)
     draw.font_size = 18
-    res_img = Image(width=int(draw.get_font_metrics(img, text, multiline=True).text_width),
-                    height=int(draw.get_font_metrics(img, text, multiline=True).text_height),
-                    background=Color('#FFFFFF80'))
+    res_img = Image(width=int(draw.get_font_metrics(img, text, multiline=True).text_width + 2 * padding_size[0]),
+                    height=int(draw.get_font_metrics(img, text, multiline=True).text_height + 2 * padding_size[1]),
+                    background=background_color)
     res_img.virtual_pixel = 'transparent'
-    draw.text(0, 14, text)
+    draw.text(padding_size[0], 14 + padding_size[1], text)
     draw(res_img)
     return res_img
