@@ -4,7 +4,7 @@ from functools import cmp_to_key
 
 
 def cmp(line1, line2):
-    return line1["priority"] - line2["priority"]
+    return line1['priority'] - line2['priority']
 
 
 class MetroMapDrawer:
@@ -13,7 +13,7 @@ class MetroMapDrawer:
 
     def get_max_text_length(self, metro_map_image):
         max_text_length = 0
-        for line in self._map_data["lines"]:
+        for line in self._map_data['lines']:
             if 'name' in line:
                 max_text_length = max(max_text_length,
                                       get_text_image(line['name'], metro_map_image,
@@ -55,8 +55,8 @@ class MetroMapDrawer:
         move(coords, delta, Direction[direction.upper()])
 
     @staticmethod
-    def continue_with_first_station(metro_map_image, element, position, direction, station_img, mcd):
-        if element['type'] == 'station':
+    def continue_with_first_station(metro_map_image, is_transfer, position, direction, station_img, mcd):
+        if not is_transfer:
             end_station = get_end_station(station_img, Orientation[opposite(direction.upper())])
         else:
             end_station = get_transfer(station_img, mcd, Orientation[direction.upper()])
@@ -67,10 +67,10 @@ class MetroMapDrawer:
         return station_center
 
     @staticmethod
-    def continue_with_station(metro_map_image, element, position, direction, station_img, mcd):
+    def continue_with_station(metro_map_image, element, is_transfer, position, direction, station_img, mcd):
         img_pos = position.copy()
 
-        if element['type'] == 'station':
+        if not is_transfer:
             station = get_station(station_img, Orientation[element['orientation'].upper()])
             move(img_pos, station_img.height // 2 + (element['orientation'] in ['right', 'down']),
                  Direction[element['orientation'].upper()])
@@ -83,15 +83,15 @@ class MetroMapDrawer:
         station_center = place(metro_map_image, station, img_pos, RelativeTo[opposite(direction.upper())])
         move_by_img(position, station, direction)
 
-        if element['type'] == 'station':
+        if not is_transfer:
             move(station_center, station_img.height // 2 + (element['orientation'] in ['right', 'down']),
                  Direction[opposite(element['orientation'].upper())])
 
         return station_center
 
     @staticmethod
-    def continue_with_last_station(metro_map_image, element, position, direction, station_img, mcd):
-        if element['type'] == 'station':
+    def continue_with_last_station(metro_map_image, is_transfer, position, direction, station_img, mcd):
+        if not is_transfer:
             end_station = get_end_station(station_img, Orientation[direction.upper()])
         else:
             end_station = get_transfer(station_img, mcd, Orientation[opposite(direction.upper())])
@@ -152,7 +152,7 @@ class MetroMapDrawer:
     def draw_line_stations_names(metro_map_image, line, stations_centers, font_filename, highlighted_station):
         station_num = 0
         for element in line['elements']:
-            if element['type'] in ['station', 'transfer']:
+            if element['type'] == 'station':
                 highlight_color = None
                 if (line['name'], element['name']) == highlighted_station:
                     highlight_color = MetroMapDrawer.get_line_img(line)[0, 0]
@@ -169,7 +169,7 @@ class MetroMapDrawer:
                     return True
                 else:
                     break
-            elif element['type'] in ['station', 'transfer']:
+            elif element['type'] == 'station':
                 break
 
         for element in reversed(line['elements'][:num+1]):
@@ -178,13 +178,21 @@ class MetroMapDrawer:
                     return True
                 else:
                     break
-            elif element['type'] in ['station', 'transfer']:
+            elif element['type'] == 'station':
                 break
 
         return False
+    
+    @staticmethod
+    def is_transfer(transfers, station_name):
+        for transfer in transfers:
+            for station in [transfer['station1'], transfer['station2']]:
+                if (station['line_name'], station['station_name']) == station_name:
+                    return True
+        return False
 
     @staticmethod
-    def draw_line(line, metro_map_image):
+    def draw_line(line, transfers, metro_map_image):
         mcd = (line['type'] == 'mcd')
 
         line_img = MetroMapDrawer.get_line_img(line)
@@ -208,15 +216,19 @@ class MetroMapDrawer:
 
                 if num != 0:
                     prev_type = line['elements'][num - 1]['type']
-                    if prev_type in ['station', 'transfer']:
-                        line_length -= station_length // 2 + 1 if prev_type == 'station' else transfer_length // 2 + 1
+                    if prev_type == 'station':
+                        prev_name = (line['name'], line['elements'][num - 1]['name'])
+                        line_length -= station_length // 2 + 1 if not MetroMapDrawer.is_transfer(transfers, prev_name) \
+                            else transfer_length // 2 + 1
                     elif prev_type == 'turn':
                         line_length -= turn_length - line_width // 2
 
                 if num != len(line['elements']) - 1:
                     next_type = line['elements'][num + 1]['type']
-                    if next_type in ['station', 'transfer']:
-                        line_length -= station_length // 2 if next_type == 'station' else transfer_length // 2
+                    if next_type == 'station':
+                        next_name = (line['name'], line['elements'][num + 1]['name'])
+                        line_length -= station_length // 2 if not MetroMapDrawer.is_transfer(transfers, next_name) \
+                            else transfer_length // 2
                     elif next_type == 'turn':
                         line_length -= turn_length - line_width // 2 - 1
 
@@ -225,16 +237,18 @@ class MetroMapDrawer:
 
                 MetroMapDrawer.continue_line(position, metro_map_image, element_img, line_length, direction)
 
-            if element['type'] in ['station', 'transfer']:
+            if element['type'] == 'station':
+                is_transfer = MetroMapDrawer.is_transfer(transfers, (line['name'], element['name']))
+
                 if num == 0:
-                    cur_station_center = MetroMapDrawer.continue_with_first_station(metro_map_image, element,
+                    cur_station_center = MetroMapDrawer.continue_with_first_station(metro_map_image, is_transfer,
                                                                                     position, direction, element_img,
                                                                                     mcd)
                 elif num != len(line['elements']) - 1:
-                    cur_station_center = MetroMapDrawer.continue_with_station(metro_map_image, element,
+                    cur_station_center = MetroMapDrawer.continue_with_station(metro_map_image, element, is_transfer,
                                                                               position, direction, element_img, mcd)
                 else:
-                    cur_station_center = MetroMapDrawer.continue_with_last_station(metro_map_image, element,
+                    cur_station_center = MetroMapDrawer.continue_with_last_station(metro_map_image, is_transfer,
                                                                                    position, direction, element_img,
                                                                                    mcd)
                 stations_centers[(line['name'], element['name'])] = cur_station_center
@@ -249,7 +263,7 @@ class MetroMapDrawer:
     def draw_logos(metro_map_image, line, stations_centers):
         logo_img = MetroMapDrawer.get_logo_img(line)
 
-        if line['elements'][0]['type'] in ['station', 'transfer']:
+        if line['elements'][0]['type'] == 'station':
             first_station_center = stations_centers[(line['name'], line['elements'][0]['name'])]
             if line['start_logo_offset'][0] is not None:
                 place(metro_map_image, logo_img,
@@ -257,7 +271,7 @@ class MetroMapDrawer:
                        first_station_center[1] + line['start_logo_offset'][1]],
                       RelativeTo.CENTER)
 
-        if line['elements'][len(line['elements']) - 1]['type'] in ['station', 'transfer']:
+        if line['elements'][len(line['elements']) - 1]['type'] == 'station':
             last_station_center = stations_centers[(line['name'], line['elements'][len(line['elements']) - 1]['name'])]
             if line['end_logo_offset'][0] is not None:
                 place(metro_map_image, logo_img,
@@ -269,7 +283,7 @@ class MetroMapDrawer:
         lines_img = Image(width=160 + self.get_max_text_length(metro_map_image),
                           height=len(self._map_data['lines']) * 40)
         cur_top = 0
-        for line in self._map_data["lines"]:
+        for line in self._map_data['lines']:
             line_img = MetroMapDrawer.get_line_img(line)
             logo_img = MetroMapDrawer.get_logo_img(line)
 
@@ -286,7 +300,7 @@ class MetroMapDrawer:
         metro_map_image.composite(lines_img, left=25, top=metro_map_image.height - lines_img.height - 20)
 
     def draw_info(self, metro_map_image):
-        info_img = Image(filename=os.path.join('input', 'images', self._map_data["info_filename"]))
+        info_img = Image(filename=os.path.join('input', 'images', self._map_data['info_filename']))
         metro_map_image.composite(info_img, left=metro_map_image.width - info_img.width,
                                   top=metro_map_image.height - info_img.height)
 
@@ -315,13 +329,13 @@ class MetroMapDrawer:
         for line in self._map_data['lines']:
             if line['name'] == transfer['station1']['line_name']:
                 color1 = MetroMapDrawer.get_line_img(line)[0, 0]
-                mcd1 = line['type'] == "mcd"
+                mcd1 = line['type'] == 'mcd'
             if line['name'] == transfer['station2']['line_name']:
                 color2 = MetroMapDrawer.get_line_img(line)[0, 0]
-                mcd2 = line['type'] == "mcd"
+                mcd2 = line['type'] == 'mcd'
 
-        coords1 = tuple(stations_centers[(transfer["station1"]["line_name"], transfer["station1"]["station_name"])])
-        coords2 = tuple(stations_centers[(transfer["station2"]["line_name"], transfer["station2"]["station_name"])])
+        coords1 = tuple(stations_centers[(transfer['station1']['line_name'], transfer['station1']['station_name'])])
+        coords2 = tuple(stations_centers[(transfer['station2']['line_name'], transfer['station2']['station_name'])])
         mid = mult(add(coords1, coords2), 0.5)
 
         if transfer['direct']:
@@ -362,30 +376,28 @@ class MetroMapDrawer:
 
             for i in range(count - 1):
                 with Drawing() as draw:
-                    draw.stroke_color = Color("rgb(134, 164, 193)")
+                    draw.stroke_color = Color('rgb(134, 164, 193)')
                     draw.fill_color = draw.stroke_color
                     draw.circle(cur_coord, add(cur_coord, (0.75, 0)))
                     draw(metro_map_image)
                     cur_coord = move_point(cur_coord, moved_coords2, step)
 
     def get_metro_map(self, highlighted_station=None):
-        metro_map_image = Image(height=self._map_data["image_resolution"][0],
-                                width=self._map_data["image_resolution"][1], background=Color('white'))
+        metro_map_image = Image(height=self._map_data['image_resolution'][0],
+                                width=self._map_data['image_resolution'][1], background=Color('white'))
 
         stations_centers = {}
-        for line in sorted(self._map_data["lines"], key=cmp_to_key(cmp)):
-            stations_centers.update(self.draw_line(line, metro_map_image))
+        for line in sorted(self._map_data['lines'], key=cmp_to_key(cmp)):
+            stations_centers.update(self.draw_line(line, self._map_data['transfers'], metro_map_image))
 
-        print(stations_centers)
-
-        for line in self._map_data["lines"]:
+        for line in self._map_data['lines']:
             self.draw_logos(metro_map_image, line, stations_centers)
 
-        if "transfers" in self._map_data:
-            for transfer in self._map_data["transfers"]:
+        if 'transfers' in self._map_data:
+            for transfer in self._map_data['transfers']:
                 self.draw_transfer(metro_map_image, transfer, stations_centers)
 
-        for line in self._map_data["lines"]:
+        for line in self._map_data['lines']:
             self.draw_line_stations_names(metro_map_image, line, stations_centers,
                                           self._map_data['font_filename'], highlighted_station)
 

@@ -22,8 +22,8 @@
                 0
             ],
             "start": [
-                320,
-                634
+                350,
+                600
             ],
             "direction": "right",
             "elements": [
@@ -64,35 +64,21 @@
                     "length": 150
                 },
                 {
-                    "type": "transfer",
+                    "type": "station",
                     "name": "Беговая",
                     "name_offset": [
-                        20,
-                        0
-                    ],
-                    "name_relative_to": "left"
-                },
-                {
-                    "type": "line",
-                    "length": 80
-                },
-                {
-                    "type": "station",
-                    "name": "Саранский бульвар",
-                    "orientation": "left",
-                    "name_offset": [
-                        -20,
-                        0
+                        -16,
+                        10
                     ],
                     "name_relative_to": "right"
                 },
                 {
                     "type": "line",
-                    "length": 120
+                    "length": 100
                 },
                 {
                     "type": "station",
-                    "name": "Советская",
+                    "name": "Саранский бульвар",
                     "orientation": "right",
                     "name_offset": [
                         20,
@@ -102,7 +88,21 @@
                 },
                 {
                     "type": "line",
-                    "length": 50
+                    "length": 100
+                },
+                {
+                    "type": "station",
+                    "name": "Советская",
+                    "orientation": "left",
+                    "name_offset": [
+                        -20,
+                        0
+                    ],
+                    "name_relative_to": "right"
+                },
+                {
+                    "type": "line",
+                    "length": 100
                 },
                 {
                     "type": "turn",
@@ -110,7 +110,7 @@
                 },
                 {
                     "type": "line",
-                    "length": 100
+                    "length": 150
                 },
                 {
                     "type": "station",
@@ -153,8 +153,8 @@
                 0
             ],
             "start": [
-                629,
-                60
+                680,
+                80
             ],
             "direction": "down",
             "elements": [
@@ -162,10 +162,10 @@
                     "type": "station",
                     "name": "Тёплый стан",
                     "name_offset": [
-                        20,
+                        -20,
                         0
                     ],
-                    "name_relative_to": "left"
+                    "name_relative_to": "right"
                 },
                 {
                     "type": "line",
@@ -174,12 +174,12 @@
                 {
                     "type": "station",
                     "name": "Крымская",
-                    "orientation": "right",
+                    "orientation": "left",
                     "name_offset": [
-                        20,
+                        -20,
                         0
                     ],
-                    "name_relative_to": "left"
+                    "name_relative_to": "right"
                 },
                 {
                     "type": "line",
@@ -191,24 +191,24 @@
                 },
                 {
                     "type": "line",
-                    "length": 50
+                    "length": 150
                 },
                 {
                     "type": "station",
                     "name": "Курская",
-                    "orientation": "up",
+                    "orientation": "down",
                     "name_offset": [
                         0,
-                        -20
+                        20
                     ],
-                    "name_relative_to": "down"
+                    "name_relative_to": "up"
                 },
                 {
                     "type": "line",
                     "length": 100
                 },
                 {
-                    "type": "transfer",
+                    "type": "station",
                     "name": "Беговая",
                     "hide_name": true,
                     "name_offset": [
