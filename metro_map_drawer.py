@@ -195,11 +195,42 @@ class MetroMapDrawer:
 
         stations_centers = {}
 
+        end_station_length = get_end_station(line_img, Orientation.RIGHT).width
+        station_length = get_station(line_img, Orientation.UP).width
+        transfer_length = get_transfer(line_img, mcd, Orientation.RIGHT).width
+        turn_length = get_arc(line_img, Turn.RIGHT_DOWN).width
+
         for (num, element) in enumerate(line['elements']):
             element_img = planned_img if MetroMapDrawer.is_planned(line, num) else line_img
 
             if element['type'] == 'line':
-                MetroMapDrawer.continue_line(position, metro_map_image, element_img, element['length'], direction)
+                line_length = element['length']
+
+                if num != 0:
+                    prev_type = line['elements'][num - 1]['type']
+                    if prev_type in ['station', 'transfer']:
+                        if num == 1:
+                            line_length -= end_station_length if prev_type == 'station' else transfer_length
+                        else:
+                            line_length -= station_length // 2 if prev_type == 'station' else transfer_length // 2
+                    elif prev_type == 'turn':
+                        line_length -= turn_length
+
+                if num != len(line['elements']) - 1:
+                    next_type = line['elements'][num + 1]['type']
+                    if next_type in ['station', 'transfer']:
+                        if num == len(line['elements']) - 2:
+                            line_length -= end_station_length if next_type == 'station' else transfer_length
+                        else:
+                            line_length -= station_length // 2 + 1 if next_type == 'station' \
+                                else transfer_length // 2 + 1
+                    elif next_type == 'turn':
+                        line_length -= turn_length
+
+                if line_length < 0:
+                    raise Exception('Line segment is too short')
+
+                MetroMapDrawer.continue_line(position, metro_map_image, element_img, line_length, direction)
 
             if element['type'] in ['station', 'transfer']:
                 if num == 0:
@@ -352,11 +383,14 @@ class MetroMapDrawer:
         for line in sorted(self._map_data["lines"], key=cmp_to_key(cmp)):
             stations_centers.update(self.draw_line(line, metro_map_image))
 
+        print(stations_centers)
+
         for line in self._map_data["lines"]:
             self.draw_logos(metro_map_image, line, stations_centers)
 
-        for transfer in self._map_data["transfers"]:
-            self.draw_transfer(metro_map_image, transfer, stations_centers)
+        if "transfers" in self._map_data:
+            for transfer in self._map_data["transfers"]:
+                self.draw_transfer(metro_map_image, transfer, stations_centers)
 
         for line in self._map_data["lines"]:
             self.draw_line_stations_names(metro_map_image, line, stations_centers,
