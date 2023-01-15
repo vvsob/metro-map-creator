@@ -1,4 +1,9 @@
+import os
 from enum import Enum
+
+from wand.color import Color
+from wand.drawing import Drawing
+from wand.image import Image
 
 
 class RelativeTo(Enum):
@@ -8,6 +13,7 @@ class RelativeTo(Enum):
     RIGHT = 3
     DOWN = 4
     CENTER = 5
+    LEFT_DOWN = 6
 
 
 class Direction(Enum):
@@ -17,22 +23,24 @@ class Direction(Enum):
     DOWN = 3
 
 
-def place(img, img_to_place, coords, relative_to):
-    coords = coords.copy()
-    half_size = (img_to_place.width // 2, img_to_place.height // 2)
+def place(image, image_to_place, coords, relative_to):
+    coords = list(coords)
+    half_size = (image_to_place.width // 2, image_to_place.height // 2)
+    if relative_to == RelativeTo.LEFT_DOWN:
+        coords[1] -= image_to_place.height - 1
     if relative_to in [RelativeTo.LEFT, RelativeTo.RIGHT]:
         coords[1] -= half_size[1]
         if relative_to == RelativeTo.RIGHT:
-            coords[0] -= img_to_place.width - 1
-    elif relative_to in [RelativeTo.UP, RelativeTo.DOWN]:
+            coords[0] -= image_to_place.width - 1
+    if relative_to in [RelativeTo.UP, RelativeTo.DOWN]:
         coords[0] -= half_size[0]
-        if relative_to == RelativeTo.DOWN:
-            coords[1] -= img_to_place.height - 1
-    elif relative_to == RelativeTo.CENTER:
+        if relative_to == RelativeTo.DOWN or relative_to == RelativeTo.LEFT_DOWN:
+            coords[1] -= image_to_place.height - 1
+    if relative_to == RelativeTo.CENTER:
         coords[0] -= half_size[0]
         coords[1] -= half_size[1]
 
-    img.composite(img_to_place, left=coords[0], top=coords[1])
+    image.composite(image_to_place, left=coords[0], top=coords[1])
     return [coords[0] + half_size[0], coords[1] + half_size[1]]
 
 
@@ -50,18 +58,39 @@ def opposite(direction):
 
 
 def move(coords, delta, direction):
+    res_coords = list(coords)
     if direction == Direction.LEFT:
-        coords[0] -= delta
+        res_coords[0] -= delta
     elif direction == Direction.UP:
-        coords[1] -= delta
+        res_coords[1] -= delta
     elif direction == Direction.RIGHT:
-        coords[0] += delta
+        res_coords[0] += delta
     else:
-        coords[1] += delta
+        res_coords[1] += delta
+    return tuple(res_coords)
 
 
-def move_by_img(coords, img, direction):
+def move_by_image(coords, image, direction):
     if direction in ['left', 'right']:
-        return move(coords, img.width, Direction[direction.upper()])
+        return move(coords, image.width, Direction[direction.upper()])
     else:
-        return move(coords, img.height, Direction[direction.upper()])
+        return move(coords, image.height, Direction[direction.upper()])
+
+
+def get_text_image(text, image, font_filename, font_color=Color('black'), background_color=Color('#FFFFFF80')):
+    padding_size = (5, 3)
+
+    if font_color == Color('black'):
+        padding_size = (0, 0)
+
+    draw = Drawing()
+    draw.fill_color = font_color
+    draw.font = os.path.join('input', 'fonts', font_filename)
+    draw.font_size = 18
+    res_image = Image(width=int(draw.get_font_metrics(image, text, multiline=True).text_width + 2 * padding_size[0]),
+                    height=int(draw.get_font_metrics(image, text, multiline=True).text_height + 2 * padding_size[1]),
+                    background=background_color)
+    res_image.virtual_pixel = 'transparent'
+    draw.text(padding_size[0], 14 + padding_size[1], text)
+    draw(res_image)
+    return res_image

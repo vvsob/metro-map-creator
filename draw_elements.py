@@ -21,7 +21,7 @@ def get_line(line, length, orientation):
     return long_line
 
 
-class Turn(Enum):
+class TurnType(Enum):
     RIGHT_DOWN = 0
     RIGHT_UP = 90
     DOWN_LEFT = 90
@@ -38,13 +38,13 @@ def get_arc(line, turn):
     arc.resize(line.height * 5, arc.height + 1)
     arc.distort('arc', (90, 45))
 
-    res_img = Image(height=arc.height + 3, width=arc.width + 3)
-    res_img.composite(arc, left=0, top=3)
-    res_img.shave(4, 4)
+    res_image = Image(height=arc.height + 3, width=arc.width + 3)
+    res_image.composite(arc, left=0, top=3)
+    res_image.shave(4, 4)
 
-    res_img.rotate(turn.value)
+    res_image.rotate(turn.value)
 
-    return res_img
+    return res_image
 
 
 def get_end_station(line, orientation):
@@ -90,14 +90,14 @@ def get_station(line, orientation):
     return station
 
 
-def get_transfer(line, mcd, orientation):
+def get_transfer(line, line_type, orientation):
     transfer = line.clone()
     transfer.virtual_pixel = 'transparent'
-    if not mcd:
+    if line_type == 'metro':
         transfer.resize(64, transfer.height)
         transfer.distort('arc', (360, 0))
         transfer.resize(27, 27)
-    else:
+    if line_type == 'mcd':
         transfer.resize(44, transfer.height + 1)
         transfer.distort('arc', (360, 0))
         transfer.resize(29, 29)
@@ -130,19 +130,3 @@ def get_transfer(line, mcd, orientation):
     base.rotate(orientation.value)
 
     return base
-
-
-def get_text_image(text, img, font_filename, font_color=Color('black'), background_color=Color('#FFFFFF80')):
-    padding_size = (5, 3)
-
-    draw = Drawing()
-    draw.fill_color = font_color
-    draw.font = os.path.join('input', 'fonts', font_filename)
-    draw.font_size = 18
-    res_img = Image(width=int(draw.get_font_metrics(img, text, multiline=True).text_width + 2 * padding_size[0]),
-                    height=int(draw.get_font_metrics(img, text, multiline=True).text_height + 2 * padding_size[1]),
-                    background=background_color)
-    res_img.virtual_pixel = 'transparent'
-    draw.text(padding_size[0], 14 + padding_size[1], text)
-    draw(res_img)
-    return res_img

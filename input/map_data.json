@@ -8,51 +8,28 @@
     "lines": [
         {
             "name": "Городская",
-            "filename": "red.png",
-            "planned_filename": "planned_red.png",
+            "line_filename": "red.png",
+            "planned_line_filename": "planned_red.png",
             "logo_filename": "red_logo.png",
             "type": "metro",
             "priority": 1,
             "start_logo_offset": [
-                -30,
-                0
+                0,
+                30
             ],
             "end_logo_offset": [
                 -30,
                 0
             ],
             "start": [
-                350,
-                600
+                450,
+                550
             ],
-            "direction": "right",
+            "direction": "up",
             "elements": [
                 {
                     "type": "station",
-                    "name": "Горная",
-                    "name_offset": [
-                        0,
-                        20
-                    ],
-                    "name_relative_to": "up",
-                    "planned": true
-                },
-                {
-                    "type": "line",
-                    "length": 100
-                },
-                {
-                    "type": "turn",
-                    "direction": "up"
-                },
-                {
-                    "type": "line",
-                    "length": 50
-                },
-                {
-                    "type": "station",
                     "name": "Кунцевская",
-                    "orientation": "right",
                     "name_offset": [
                         20,
                         0
@@ -60,7 +37,7 @@
                     "name_relative_to": "left"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 150
                 },
                 {
@@ -73,7 +50,7 @@
                     "name_relative_to": "right"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -87,7 +64,7 @@
                     "name_relative_to": "left"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -101,7 +78,7 @@
                     "name_relative_to": "right"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -109,7 +86,7 @@
                     "direction": "left"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 150
                 },
                 {
@@ -123,7 +100,7 @@
                     "name_relative_to": "up"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 150
                 },
                 {
@@ -139,8 +116,8 @@
         },
         {
             "name": "Беговая",
-            "filename": "blue.png",
-            "planned_filename": "planned_blue.png",
+            "line_filename": "blue.png",
+            "planned_line_filename": "planned_blue.png",
             "logo_filename": "blue_logo.png",
             "type": "metro",
             "priority": 0,
@@ -153,8 +130,8 @@
                 0
             ],
             "start": [
-                680,
-                80
+                630,
+                50
             ],
             "direction": "down",
             "elements": [
@@ -168,8 +145,8 @@
                     "name_relative_to": "right"
                 },
                 {
-                    "type": "line",
-                    "length": 150
+                    "type": "line_segment",
+                    "length": 180
                 },
                 {
                     "type": "station",
@@ -182,7 +159,7 @@
                     "name_relative_to": "right"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 150
                 },
                 {
@@ -190,21 +167,20 @@
                     "direction": "left"
                 },
                 {
-                    "type": "line",
-                    "length": 150
+                    "type": "line_segment",
+                    "length": 100
                 },
                 {
                     "type": "station",
                     "name": "Курская",
-                    "orientation": "down",
                     "name_offset": [
                         0,
-                        20
+                        -20
                     ],
-                    "name_relative_to": "up"
+                    "name_relative_to": "down"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -218,7 +194,7 @@
                     "name_relative_to": "center"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -232,7 +208,7 @@
                     "name_relative_to": "down"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -246,7 +222,7 @@
                     "name_relative_to": "up"
                 },
                 {
-                    "type": "line",
+                    "type": "line_segment",
                     "length": 100
                 },
                 {
@@ -258,6 +234,72 @@
                         -20
                     ],
                     "name_relative_to": "down"
+                }
+            ]
+        },
+        {
+            "name": "Первый диаметр",
+            "line_filename": "mcd1.png",
+            "logo_filename": "mcd1_logo.png",
+            "type": "mcd",
+            "priority": 0,
+            "start_logo_offset": [
+                null,
+                null
+            ],
+            "end_logo_offset": [
+                0,
+                30
+            ],
+            "start": [
+                480,
+                430
+            ],
+            "direction": "left",
+            "elements": [
+                {
+                    "type": "station",
+                    "name": "Возрождение",
+                    "name_offset": [
+                        15,
+                        15
+                    ],
+                    "name_relative_to": "left"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 300
+                },
+                {
+                    "type": "station",
+                    "name": "Ферма золота",
+                    "orientation": "down",
+                    "name_offset": [
+                        0,
+                        20
+                    ],
+                    "name_relative_to": "up"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 100
+                },
+                {
+                    "type": "turn",
+                    "direction": "down"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 70
+                },
+                {
+                    "type": "station",
+                    "name": "Крепость",
+                    "name_offset": [
+                        20,
+                        0
+                    ],
+                    "name_relative_to": "left"
                 }
             ]
         }
@@ -272,7 +314,29 @@
                 "line_name": "Беговая",
                 "station_name": "Беговая"
             },
-            "direct": true
+            "is_direct": true
+        },
+        {
+            "station1": {
+                "line_name": "Городская",
+                "station_name": "Беговая"
+            },
+            "station2": {
+                "line_name": "Первый диаметр",
+                "station_name": "Возрождение"
+            },
+            "is_direct": false
+        },
+        {
+            "station1": {
+                "line_name": "Беговая",
+                "station_name": "Курская"
+            },
+            "station2": {
+                "line_name": "Первый диаметр",
+                "station_name": "Возрождение"
+            },
+            "is_direct": false
         }
     ]
 }
