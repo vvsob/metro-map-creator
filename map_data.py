@@ -70,6 +70,31 @@ class Station(Element):
     def is_transfer(self):
         return len(self.transfers) > 0
 
+    def get_transfer_stations(self):
+        transfer_stations = set()
+        self.get_transfer_stations_rec(transfer_stations)
+        transfer_stations.remove(self)
+        return transfer_stations
+
+    def get_transfer_stations_rec(self, used, indirect_limit=1):
+        used.add(self)
+
+        for transfer in self.transfers:
+            another_station = transfer.stations[0] if transfer.stations[1] == self else transfer.stations[1]
+            if another_station not in used and not (indirect_limit == 0 and not transfer.is_direct):
+                if not transfer.is_direct:
+                    indirect_limit -= 1
+                another_station.get_transfer_stations_rec(used, indirect_limit)
+
+    def get_transfer_lines(self):
+        transfer_lines = set()
+        for transfer_station in self.get_transfer_stations():
+            transfer_lines.add(transfer_station.line)
+
+        if self.line in transfer_lines:
+            transfer_lines.remove(self.line)
+        return transfer_lines
+
 
 class Line:
     def __init__(self, map_data, line_json):
@@ -109,7 +134,6 @@ class Line:
         self.direction = get(line_json, 'direction')
 
         self.elements = []
-
         cur_pos = self.start
         cur_direction = self.direction
         for element in line_json['elements']:
@@ -121,6 +145,17 @@ class Line:
                 cur_direction = element['direction']
             if element['type'] == 'station':
                 self.elements.append(Station(self, element, cur_pos))
+
+    def fix_stations_positions(self):
+        cur_pos = self.start
+        cur_direction = self.direction
+        for element in self.elements:
+            if isinstance(element, LineSegment):
+                cur_pos = move(cur_pos, element.length, Direction[cur_direction.upper()])
+            if isinstance(element, Turn):
+                cur_direction = element.direction
+            if isinstance(element, Station):
+                element.position = cur_pos
 
     def get_station(self, station_name):
         for element in self.elements:
@@ -145,6 +180,12 @@ class MapData:
         self.info_image = Image(filename=os.path.join('input', 'images', map_data_json['info_filename']))
         self.font_filename = map_data_json['font_filename']
 
+        if 'no_boarding_filename' in map_data_json:
+            self.no_boarding_image = Image(filename=os.path.join('input', 'images',
+                                                                 map_data_json['no_boarding_filename']))
+        else:
+            self.no_boarding_image = None
+
         self.lines = []
         for line_json in map_data_json['lines']:
             self.lines.append(Line(self, line_json))
@@ -156,9 +197,7 @@ class MapData:
                 self.transfers.append(cur_transfer)
 
                 for station in cur_transfer.stations:
-                    for another_station in cur_transfer.stations:
-                        if station != another_station:
-                            station.transfers.append(another_station)
+                    station.transfers.append(cur_transfer)
 
     def get_line(self, line_name):
         for line in self.lines:

@@ -94,3 +94,19 @@ def get_text_image(text, image, font_filename, font_color=Color('black'), backgr
     draw.text(padding_size[0], 14 + padding_size[1], text)
     draw(res_image)
     return res_image
+
+
+def get_arrow_image(size, color=Color('black'), background=Color('white')):
+    image = Image(width=size, height=size, background=background)
+
+    with Drawing() as draw:
+        draw.stroke_color = color
+        draw.stroke_width = 4
+        draw.line((4, size // 2), (size - 1, size // 2))
+        draw.draw(image)
+        draw.line((2, size // 2 + 1), (size // 2, 2 + 1))
+        draw.draw(image)
+        draw.line((2, size // 2 - 1), (size // 2, size - 1 - 2 - 1))
+        draw.draw(image)
+
+    return image

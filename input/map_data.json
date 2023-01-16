@@ -5,6 +5,7 @@
     ],
     "info_filename": "info.png",
     "font_filename": "Calibri Regular.ttf",
+    "no_boarding_filename": "no_boarding.png",
     "lines": [
         {
             "name": "Городская",

@@ -1,3 +1,5 @@
+import copy
+
 from draw_elements import *
 from utilities import *
 from functools import cmp_to_key
@@ -116,7 +118,7 @@ class MetroMapDrawer:
         for element in line.elements:
             if isinstance(element, Station):
                 highlight_color = None
-                if element.full_name() == highlighted_station:
+                if element == highlighted_station:
                     highlight_color = line.line_image[0, 0]
                 MetroMapDrawer.draw_station_name(metro_map_image, element, font_filename, highlight_color)
 
@@ -219,7 +221,8 @@ class MetroMapDrawer:
         metro_map_image.composite(self.map_data.info_image, left=metro_map_image.width - self.map_data.info_image.width,
                                   top=metro_map_image.height - self.map_data.info_image.height)
 
-    def draw_transfer(self, metro_map_image, transfer):
+    @staticmethod
+    def draw_transfer(metro_map_image, transfer):
         def add(point1, point2):
             return point1[0] + point2[0], point1[1] + point2[1]
 
@@ -314,50 +317,142 @@ class MetroMapDrawer:
 
         return metro_map_image
 
-    # def get_linear_metro_map(self, natural_direction, line_name, station_name=None):
-    #     station_line = self.map_data.get_line(line_name)
-    #
-    #     stations = list(station_line['elements'])
-    #     station_line['elements'].clear()
-    #
-    #     if not natural_direction:
-    #         stations = reversed(stations)
-    #
-    #     is_first_station = True
-    #     for (num, element) in enumerate(stations):
-    #         if element['type'] == 'station' and ('planned' not in element or not element['planned']):
-    #             if start_station_name[1] == element['name']:
-    #                 stations = stations[num:]
-    #                 break
-    #             is_first_station = False
-    #
-    #     stations = [element for element in stations if element['type'] == 'station']
-    #
-    #     metro_map_image = Image(height=128, width=2048, background=Color('white'))
-    #
-    #     station_line['start'] = [2048 - 64, 60]
-    #     station_line['direction'] = 'left'
-    #     for (num, station) in enumerate(stations):
-    #         station['orientation'] = 'up'
-    #         if not MetroMapDrawer.is_transfer(self.map_data.transfers'], (station_line['name'], station['name'])):
-    #             station['name_offset'] = [0, -17]
-    #             station['name_relative_to'] = 'down'
-    #         else:
-    #             station['name_offset'] = [-10, -17]
-    #             station['name_relative_to'] = 'left_down'
-    #         station['hide_name'] = False
-    #         if not (num == 0 and is_first_station):
-    #             station_line['elements'].append({'type': 'line', 'length': 150})
-    #         station_line['elements'].append(station)
-    #
-    #     stations_centers = MetroMapDrawer.draw_line(station_line, self.map_data.transfers'], metro_map_image)
-    #     MetroMapDrawer.draw_line_stations_names(metro_map_image, station_line, stations_centers,
-    #                                             self.map_data.font_filename'], start_station_name)
-    #
-    #     for station in stations:
-    #         station_name = (station_line['name'], station['name'])
-    #         if MetroMapDrawer.is_transfer(self.map_data.transfers'], station_name):
-    #             place(metro_map_image, MetroMapDrawer.get_logo_image(station_line),
-    #                   [stations_centers[station_name][0], stations_centers[station_name][1] + 30], RelativeTo.CENTER)
-    #
-    #     return metro_map_image
+    def get_linear_metro_map(self, natural_direction, line_name, start_station_name=None):
+        station_line = self.map_data.get_line(line_name)
+        start_station = station_line.get_station(start_station_name)
+
+        elements = list(station_line.elements)
+        if not natural_direction:
+            elements = list(reversed(elements))
+
+        is_first_station = True
+        if start_station_name is not None:
+            for (num, element) in enumerate(elements):
+                if isinstance(element, Station) and not element.is_actually_planned():
+                    if element == start_station:
+                        elements = elements[num:]
+                        break
+                    is_first_station = False
+
+        stations = [element for element in elements if isinstance(element, Station)]
+        for (num, station) in enumerate(stations):
+            if station.is_actually_planned():
+                stations = stations[:num]
+                break
+
+        if len(stations) <= 1:
+            return self.map_data.no_boarding_image
+
+        temp_image = Image(width=100, height=100)
+
+        line_segments_length = []
+        stations_orientation = []
+        stations_transfers_length = []
+
+        first_name_length = None
+        prev_station_position = None
+        last_top = 0
+        last_bottom = 0
+        is_top = True
+        for station in stations:
+            if station.is_transfer():
+                is_top = True
+
+            name_length = get_text_image(station.name, temp_image, self.map_data.font_filename).width
+
+            if first_name_length is None:
+                first_name_length = name_length
+
+            transfer_lines = station.get_transfer_lines()
+            transfers_length = max(0, 10 * (len(transfer_lines) - 1))
+            for line in transfer_lines:
+                transfers_length += line.logo_image.width
+            stations_transfers_length.append(transfers_length)
+
+            if is_top:
+                station_position = max(last_top + 40 + name_length // 2, last_bottom + 40 + transfers_length // 2)
+                last_top = station_position + (name_length + 1) // 2
+                last_bottom = station_position + (transfers_length + 1) // 2
+            else:
+                station_position = max(last_top + 40, last_bottom + 40 + name_length // 2)
+                last_top = station_position
+                last_bottom = station_position + (name_length + 1) // 2
+
+            stations_orientation.append('up' if is_top else 'down')
+            if prev_station_position is not None:
+                line_segments_length.append(station_position - prev_station_position)
+
+            prev_station_position = station_position
+            is_top = not is_top
+
+        total_width = max(last_top, last_bottom)
+
+        last_station_name_image = get_text_image(stations[len(stations) - 1].name, temp_image,
+                                                 self.map_data.font_filename)
+        end_offset = 20 + 27 + 10 + station_line.logo_image.width + 10 + last_station_name_image.width + 20
+
+        total_width += end_offset
+
+        linear_line = copy.copy(station_line)
+        linear_line.elements = list(station_line.elements)
+        linear_line.elements.clear()
+
+        if not is_first_station:
+            total_width += max(first_name_length // 2, 50) - first_name_length // 2
+            linear_line.elements.append(LineSegment(linear_line, {'length': max(first_name_length // 2 + 20, 50)}))
+
+        linear_line.start_logo_offset = None
+        linear_line.end_logo_offset = None
+        linear_line.direction = 'left'
+        if is_first_station:
+            linear_line.start = (total_width - 1 - 20 - first_name_length // 2, 64)
+        else:
+            linear_line.start = (total_width - 1, 64)
+
+        linear_metro_map_image = Image(width=total_width, height=128, background=Color('white'))
+
+        for (num, station) in enumerate(stations):
+            if not station.is_transfer():
+                station.orientation = stations_orientation[num]
+                station.name_relative_to = opposite(station.orientation.upper()).lower()
+            else:
+                station.name_relative_to = 'down'
+
+            if station.orientation == 'down':
+                station.name_offset = (0, 20)
+            else:
+                station.name_offset = (0, -20)
+
+            station.hide_name = False
+
+            linear_line.elements.append(station)
+            if num != len(stations) - 1:
+                linear_line.elements.append(LineSegment(linear_line, {'length': line_segments_length[num]}))
+
+        linear_line.fix_stations_positions()
+
+        for (num, station) in enumerate(stations):
+            if station.is_transfer():
+                cur_logo_pos = station.position[0] - stations_transfers_length[num] // 2
+                for line in station.get_transfer_lines():
+                    transfer_logo = line.logo_image
+                    place(linear_metro_map_image, transfer_logo, (cur_logo_pos, 100), RelativeTo.LEFT)
+                    cur_logo_pos += transfer_logo.width + 10
+
+        MetroMapDrawer.draw_line(linear_line, linear_metro_map_image)
+        MetroMapDrawer.draw_line_stations_names(linear_metro_map_image, linear_line,
+                                                self.map_data.font_filename, start_station)
+
+        with Drawing() as draw:
+            draw.stroke_color = Color('gray')
+            draw.line((end_offset, 10), (end_offset, 118))
+            draw.draw(linear_metro_map_image)
+
+        cur_pos = 20
+        place(linear_metro_map_image, get_arrow_image(27), (cur_pos, 64), RelativeTo.LEFT)
+        cur_pos += get_arrow_image(27).width + 10
+        place(linear_metro_map_image, linear_line.logo_image, (cur_pos, 64), RelativeTo.LEFT)
+        cur_pos += linear_line.logo_image.width + 10
+        place(linear_metro_map_image, last_station_name_image, (cur_pos, 64), RelativeTo.LEFT)
+
+        return linear_metro_map_image
