@@ -317,12 +317,12 @@ class MetroMapDrawer:
 
         return metro_map_image
 
-    def get_linear_metro_map(self, natural_direction, line_name, start_station_name=None):
+    def get_linear_metro_map(self, reverse_direction, line_name, start_station_name=None):
         station_line = self.map_data.get_line(line_name)
         start_station = station_line.get_station(start_station_name)
 
         elements = list(station_line.elements)
-        if not natural_direction:
+        if reverse_direction:
             elements = list(reversed(elements))
 
         is_first_station = True
@@ -355,7 +355,7 @@ class MetroMapDrawer:
         last_bottom = 0
         is_top = True
         for station in stations:
-            if station.is_transfer():
+            if station.is_transfer() or station == stations[len(stations) - 1]:
                 is_top = True
 
             name_length = get_text_image(station.name, temp_image, self.map_data.font_filename).width
