@@ -13,7 +13,7 @@
             "planned_line_filename": "planned_red.png",
             "logo_filename": "red_logo.png",
             "type": "metro",
-            "priority": 1,
+            "priority": 3,
             "start_logo_offset": [
                 0,
                 30
@@ -57,12 +57,12 @@
                 {
                     "type": "station",
                     "name": "Саранский бульвар",
-                    "orientation": "right",
+                    "orientation": "left",
                     "name_offset": [
-                        20,
+                        -20,
                         0
                     ],
-                    "name_relative_to": "left"
+                    "name_relative_to": "right"
                 },
                 {
                     "type": "line_segment",
@@ -121,7 +121,7 @@
             "planned_line_filename": "planned_blue.png",
             "logo_filename": "blue_logo.png",
             "type": "metro",
-            "priority": 0,
+            "priority": 2,
             "start_logo_offset": [
                 0,
                 -30
@@ -169,7 +169,7 @@
                 },
                 {
                     "type": "line_segment",
-                    "length": 100
+                    "length": 85
                 },
                 {
                     "type": "station",
@@ -182,7 +182,7 @@
                 },
                 {
                     "type": "line_segment",
-                    "length": 100
+                    "length": 115
                 },
                 {
                     "type": "station",
@@ -243,29 +243,50 @@
             "line_filename": "mcd1.png",
             "logo_filename": "mcd1_logo.png",
             "type": "mcd",
-            "priority": 0,
+            "priority": 1,
             "start_logo_offset": [
-                null,
-                null
+                0,
+                -30
             ],
             "end_logo_offset": [
                 0,
                 30
             ],
             "start": [
-                480,
-                430
+                670,
+                350
             ],
-            "direction": "left",
+            "direction": "down",
             "elements": [
+                {
+                    "type": "station",
+                    "name": "Крайняя",
+                    "name_offset": [
+                        20,
+                        0
+                    ],
+                    "name_relative_to": "left"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 80
+                },
+                {
+                    "type": "turn",
+                    "direction": "left"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 190
+                },
                 {
                     "type": "station",
                     "name": "Возрождение",
                     "name_offset": [
-                        15,
-                        15
+                        5,
+                        30
                     ],
-                    "name_relative_to": "left"
+                    "name_relative_to": "right"
                 },
                 {
                     "type": "line_segment",
@@ -303,6 +324,58 @@
                     "name_relative_to": "left"
                 }
             ]
+        },
+        {
+            "name": "Второй диаметр",
+            "line_filename": "mcd2.png",
+            "logo_filename": "mcd2_logo.png",
+            "type": "mcd",
+            "priority": 0,
+            "start_logo_offset": [
+                null,
+                null
+            ],
+            "end_logo_offset": [
+                -50,
+                0
+            ],
+            "start": [
+                505,
+                455
+            ],
+            "direction": "up",
+            "elements": [
+                {
+                    "type": "station",
+                    "name": "Возрождение",
+                    "name_offset": [
+                        20,
+                        0
+                    ],
+                    "hide_name": true
+                },
+                {
+                    "type": "line_segment",
+                    "length": 400
+                },
+                {
+                    "type": "turn",
+                    "direction": "left"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 100
+                },
+                {
+                    "type": "station",
+                    "name": "Ферма трезубцев",
+                    "name_offset": [
+                        0,
+                        -20
+                    ],
+                    "name_relative_to": "down"
+                }
+            ]
         }
     ],
     "transfers": [
@@ -335,6 +408,17 @@
             },
             "station2": {
                 "line_name": "Первый диаметр",
+                "station_name": "Возрождение"
+            },
+            "is_direct": false
+        },
+        {
+            "station1": {
+                "line_name": "Первый диаметр",
+                "station_name": "Возрождение"
+            },
+            "station2": {
+                "line_name": "Второй диаметр",
                 "station_name": "Возрождение"
             },
             "is_direct": false

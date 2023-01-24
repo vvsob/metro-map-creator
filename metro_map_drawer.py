@@ -349,7 +349,7 @@ class MetroMapDrawer:
         stations_orientation = []
         stations_transfers_length = []
 
-        first_name_length = None
+        first_offset = None
         prev_station_position = None
         last_top = 0
         last_bottom = 0
@@ -359,9 +359,6 @@ class MetroMapDrawer:
                 is_top = True
 
             name_length = get_text_image(station.name, temp_image, self.map_data.font_filename).width
-
-            if first_name_length is None:
-                first_name_length = name_length
 
             transfer_lines = station.get_transfer_lines()
             transfers_length = max(0, 10 * (len(transfer_lines) - 1))
@@ -377,6 +374,9 @@ class MetroMapDrawer:
                 station_position = max(last_top + 40, last_bottom + 40 + name_length // 2)
                 last_top = station_position
                 last_bottom = station_position + (name_length + 1) // 2
+
+            if first_offset is None:
+                first_offset = max(last_top, last_bottom) - 20
 
             stations_orientation.append('up' if is_top else 'down')
             if prev_station_position is not None:
@@ -398,14 +398,14 @@ class MetroMapDrawer:
         linear_line.elements.clear()
 
         if not is_first_station:
-            total_width += max(first_name_length // 2, 50) - first_name_length // 2
-            linear_line.elements.append(LineSegment(linear_line, {'length': max(first_name_length // 2 + 20, 50)}))
+            total_width += max(first_offset // 2, 50) - first_offset // 2
+            linear_line.elements.append(LineSegment(linear_line, {'length': max(first_offset // 2 + 20, 50)}))
 
         linear_line.start_logo_offset = None
         linear_line.end_logo_offset = None
         linear_line.direction = 'left'
         if is_first_station:
-            linear_line.start = (total_width - 1 - 20 - first_name_length // 2, 64)
+            linear_line.start = (total_width - 1 - 20 - first_offset // 2, 64)
         else:
             linear_line.start = (total_width - 1, 64)
 
@@ -455,4 +455,6 @@ class MetroMapDrawer:
         cur_pos += linear_line.logo_image.width + 10
         place(linear_metro_map_image, last_station_name_image, (cur_pos, 64), RelativeTo.LEFT)
 
-        return linear_metro_map_image
+        round_corners(linear_metro_map_image, 10)
+
+        return complete_width(linear_metro_map_image)

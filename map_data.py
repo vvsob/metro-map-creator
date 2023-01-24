@@ -82,9 +82,7 @@ class Station(Element):
         for transfer in self.transfers:
             another_station = transfer.stations[0] if transfer.stations[1] == self else transfer.stations[1]
             if another_station not in used and not (indirect_limit == 0 and not transfer.is_direct):
-                if not transfer.is_direct:
-                    indirect_limit -= 1
-                another_station.get_transfer_stations_rec(used, indirect_limit)
+                another_station.get_transfer_stations_rec(used, indirect_limit - (not transfer.is_direct))
 
     def get_transfer_lines(self):
         transfer_lines = set()

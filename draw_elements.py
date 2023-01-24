@@ -1,8 +1,6 @@
 from wand.image import Image
 from wand.color import Color
-from wand.drawing import Drawing
 from enum import Enum
-import os
 
 
 class Orientation(Enum):

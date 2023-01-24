@@ -88,8 +88,8 @@ def get_text_image(text, image, font_filename, font_color=Color('black'), backgr
     draw.font = os.path.join('input', 'fonts', font_filename)
     draw.font_size = 18
     res_image = Image(width=int(draw.get_font_metrics(image, text, multiline=True).text_width + 2 * padding_size[0]),
-                    height=int(draw.get_font_metrics(image, text, multiline=True).text_height + 2 * padding_size[1]),
-                    background=background_color)
+                      height=int(draw.get_font_metrics(image, text, multiline=True).text_height + 2 * padding_size[1]),
+                      background=background_color)
     res_image.virtual_pixel = 'transparent'
     draw.text(padding_size[0], 14 + padding_size[1], text)
     draw(res_image)
@@ -110,3 +110,29 @@ def get_arrow_image(size, color=Color('black'), background=Color('white')):
         draw.draw(image)
 
     return image
+
+
+def round_corner(image, radius, coords, positive_dx, positive_dy):
+    for x in (range(coords[0], coords[0] + radius + 1) if positive_dx else range(coords[0] - radius, coords[0] + 1)):
+        for y in (range(coords[1], coords[1] + radius + 1) if positive_dy else range(coords[1] - radius,
+                                                                                     coords[1] + 1)):
+            if (x - coords[0]) ** 2 + (y - coords[1]) ** 2 > radius ** 2:
+                image[x, y] = Color('#FFFFFF00')
+
+
+def round_corners(image, radius):
+    round_corner(image, radius, (radius, radius), False, False)
+    round_corner(image, radius, (image.width - 1 - radius, radius), True, False)
+    round_corner(image, radius, (radius, image.height - 1 - radius), False, True)
+    round_corner(image, radius, (image.width - 1 - radius, image.height - 1 - radius), True, True)
+
+
+def complete_width(image):
+    map_width = image.width
+    total_width = (map_width + 128 - 1) // 128 * 128
+    if total_width // 128 % 2 == 0:
+        total_width += 128
+
+    formatted_image = Image(width=total_width, height=128, background=Color('#FFFFFF00'))
+    formatted_image.composite(image, left=(total_width - map_width) // 2)
+    return formatted_image
