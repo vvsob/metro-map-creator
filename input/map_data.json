@@ -290,7 +290,21 @@
                 },
                 {
                     "type": "line_segment",
-                    "length": 300
+                    "length": 240
+                },
+                {
+                    "type": "station",
+                    "name": "Ферма мобов",
+                    "orientation": "down",
+                    "name_offset": [
+                        0,
+                        20
+                    ],
+                    "name_relative_to": "up"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 130
                 },
                 {
                     "type": "station",
@@ -304,7 +318,7 @@
                 },
                 {
                     "type": "line_segment",
-                    "length": 100
+                    "length": 70
                 },
                 {
                     "type": "turn",

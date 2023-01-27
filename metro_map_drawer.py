@@ -434,7 +434,7 @@ class MetroMapDrawer:
         for (num, station) in enumerate(stations):
             if station.is_transfer():
                 cur_logo_pos = station.position[0] - stations_transfers_length[num] // 2
-                for line in station.get_transfer_lines():
+                for line in reversed(sorted(station.get_transfer_lines(), key=cmp_to_key(cmp))):
                     transfer_logo = line.logo_image
                     place(linear_metro_map_image, transfer_logo, (cur_logo_pos, 100), RelativeTo.LEFT)
                     cur_logo_pos += transfer_logo.width + 10
