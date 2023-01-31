@@ -2,6 +2,8 @@ from wand.image import Image
 from wand.color import Color
 from enum import Enum
 
+from functools import lru_cache
+
 
 class Orientation(Enum):
     RIGHT = 0
@@ -12,6 +14,7 @@ class Orientation(Enum):
     VERTICAL = 450
 
 
+@lru_cache(maxsize=10)
 def get_line(line, length, orientation):
     long_line = line.clone()
     long_line.resize(width=length)
@@ -30,6 +33,7 @@ class TurnType(Enum):
     UP_LEFT = 0
 
 
+@lru_cache(maxsize=10)
 def get_arc(line, turn):
     arc = line.clone()
     arc.virtual_pixel = 'transparent'
@@ -45,6 +49,7 @@ def get_arc(line, turn):
     return res_image
 
 
+@lru_cache(maxsize=10)
 def get_end_station(line, orientation):
     end_station = Image(width=line.height, height=3*line.height)
     end_station.virtual_pixel = 'transparent'
@@ -68,6 +73,7 @@ def get_end_station(line, orientation):
     return end_station
 
 
+@lru_cache(maxsize=10)
 def get_station(line, orientation):
     station = Image(width=2*line.height, height=line.height)
     station.virtual_pixel = 'transparent'
@@ -88,6 +94,7 @@ def get_station(line, orientation):
     return station
 
 
+@lru_cache(maxsize=10)
 def get_transfer(line, line_type, orientation):
     transfer = line.clone()
     transfer.virtual_pixel = 'transparent'

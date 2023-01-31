@@ -202,7 +202,7 @@ class MetroMapDrawer:
 
     def draw_lines_info(self, metro_map_image):
         lines_image = Image(width=400 + self.get_max_text_length(metro_map_image),
-                            height=len(self.map_data.lines) * 40)
+                            height=len(self.map_data.lines) * 33)
         cur_top = 0
         for line in self.map_data.lines:
             place(lines_image, line.logo_image, [30, cur_top + 20], RelativeTo.CENTER)
@@ -213,7 +213,7 @@ class MetroMapDrawer:
             place(lines_image, get_text_image(line.name, metro_map_image, self.map_data.font_filename),
                   [190, cur_top + 20], RelativeTo.LEFT)
 
-            cur_top += 40
+            cur_top += 33
 
         metro_map_image.composite(lines_image, left=25, top=metro_map_image.height - lines_image.height - 20)
 
@@ -317,7 +317,7 @@ class MetroMapDrawer:
 
         return metro_map_image
 
-    def get_linear_metro_map(self, reverse_direction, line_name, start_station_name=None):
+    def get_linear_metro_map(self, reverse_direction, line_name, start_station_name=None, is_bidirectional=False):
         station_line = self.map_data.get_line(line_name)
         start_station = station_line.get_station(start_station_name)
 
@@ -326,19 +326,21 @@ class MetroMapDrawer:
             elements = list(reversed(elements))
 
         is_first_station = True
-        if start_station_name is not None:
-            for (num, element) in enumerate(elements):
-                if isinstance(element, Station) and not element.is_actually_planned():
-                    if element == start_station:
-                        elements = elements[num:]
-                        break
-                    is_first_station = False
+        if not is_bidirectional:
+            if start_station_name is not None:
+                for (num, element) in enumerate(elements):
+                    if isinstance(element, Station) and not element.is_actually_planned():
+                        if element == start_station:
+                            elements = elements[num:]
+                            break
+                        is_first_station = False
 
         stations = [element for element in elements if isinstance(element, Station)]
-        for (num, station) in enumerate(stations):
-            if station.is_actually_planned():
-                stations = stations[:num]
-                break
+        if not is_bidirectional:
+            for (num, station) in enumerate(stations):
+                if station.is_actually_planned():
+                    stations = stations[:num]
+                    break
 
         if len(stations) <= 1:
             return self.map_data.no_boarding_image
@@ -387,11 +389,17 @@ class MetroMapDrawer:
 
         total_width = max(last_top, last_bottom)
 
-        last_station_name_image = get_text_image(stations[len(stations) - 1].name, temp_image,
-                                                 self.map_data.font_filename)
-        end_offset = 20 + 27 + 10 + station_line.logo_image.width + 10 + last_station_name_image.width + 20
-
-        total_width += end_offset
+        direction_image = get_direction_image(station_line.logo_image, stations[len(stations) - 1].name,
+                                              station_line.map_data.font_filename)
+        reverse_direction_image = None
+        if not (is_bidirectional and start_station_name == stations[len(stations) - 1].name):
+            total_width += direction_image.width
+        else:
+            total_width += 20
+        if is_bidirectional and not start_station_name == stations[0].name:
+            reverse_direction_image = get_direction_image(station_line.logo_image, stations[0].name,
+                                                          station_line.map_data.font_filename, True)
+            total_width += reverse_direction_image.width
 
         linear_line = copy.copy(station_line)
         linear_line.elements = list(station_line.elements)
@@ -410,6 +418,14 @@ class MetroMapDrawer:
             linear_line.start = (total_width - 1, 64)
 
         linear_metro_map_image = Image(width=total_width, height=128, background=Color('white'))
+        linear_metro_map_image.virtual_pixel = 'transparent'
+
+        if not (is_bidirectional and start_station_name == stations[len(stations) - 1].name):
+            linear_metro_map_image.composite(direction_image)
+        if is_bidirectional and not start_station_name == stations[0].name:
+            linear_metro_map_image.composite(reverse_direction_image, left=linear_metro_map_image.width -
+                                             reverse_direction_image.width)
+            linear_line.start = (linear_line.start[0] - reverse_direction_image.width, linear_line.start[1])
 
         for (num, station) in enumerate(stations):
             if not station.is_transfer():
@@ -442,18 +458,6 @@ class MetroMapDrawer:
         MetroMapDrawer.draw_line(linear_line, linear_metro_map_image)
         MetroMapDrawer.draw_line_stations_names(linear_metro_map_image, linear_line,
                                                 self.map_data.font_filename, start_station)
-
-        with Drawing() as draw:
-            draw.stroke_color = Color('gray')
-            draw.line((end_offset, 10), (end_offset, 118))
-            draw.draw(linear_metro_map_image)
-
-        cur_pos = 20
-        place(linear_metro_map_image, get_arrow_image(27), (cur_pos, 64), RelativeTo.LEFT)
-        cur_pos += get_arrow_image(27).width + 10
-        place(linear_metro_map_image, linear_line.logo_image, (cur_pos, 64), RelativeTo.LEFT)
-        cur_pos += linear_line.logo_image.width + 10
-        place(linear_metro_map_image, last_station_name_image, (cur_pos, 64), RelativeTo.LEFT)
 
         round_corners(linear_metro_map_image, 10)
 

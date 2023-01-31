@@ -112,6 +112,41 @@ def get_arrow_image(size, color=Color('black'), background=Color('white')):
     return image
 
 
+def get_direction_image(logo_image, last_station_name, font_filename, reverse_direction=False):
+    last_station_name_image = get_text_image(last_station_name, logo_image, font_filename)
+    image_width = 20 + 27 + 10 + logo_image.width + 10 + last_station_name_image.width + 20
+
+    direction_image = Image(width=image_width, height=128, background=Color('white'))
+
+    cur_pos = 20
+    if not reverse_direction:
+        place(direction_image, get_arrow_image(27), (cur_pos, 64), RelativeTo.LEFT)
+        cur_pos += get_arrow_image(27).width + 10
+        place(direction_image, logo_image, (cur_pos, 64), RelativeTo.LEFT)
+        cur_pos += logo_image.width + 10
+        place(direction_image, last_station_name_image, (cur_pos, 64), RelativeTo.LEFT)
+
+        with Drawing() as draw:
+            draw.stroke_color = Color('gray')
+            draw.line((image_width - 1, 10), (image_width - 1, 118))
+            draw.draw(direction_image)
+    else:
+        with Drawing() as draw:
+            draw.stroke_color = Color('gray')
+            draw.line((0, 10), (0, 118))
+            draw.draw(direction_image)
+
+        place(direction_image, last_station_name_image, (cur_pos, 64), RelativeTo.LEFT)
+        cur_pos += last_station_name_image.width + 10
+        place(direction_image, logo_image, (cur_pos, 64), RelativeTo.LEFT)
+        cur_pos += logo_image.width + 10
+        arrow_image = get_arrow_image(27)
+        arrow_image.flop()
+        place(direction_image, arrow_image, (cur_pos, 64), RelativeTo.LEFT)
+
+    return direction_image
+
+
 def round_corner(image, radius, coords, positive_dx, positive_dy):
     for x in (range(coords[0], coords[0] + radius + 1) if positive_dx else range(coords[0] - radius, coords[0] + 1)):
         for y in (range(coords[1], coords[1] + radius + 1) if positive_dy else range(coords[1] - radius,

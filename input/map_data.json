@@ -13,7 +13,7 @@
             "planned_line_filename": "planned_red.png",
             "logo_filename": "red_logo.png",
             "type": "metro",
-            "priority": 3,
+            "priority": 4,
             "start_logo_offset": [
                 0,
                 30
@@ -30,7 +30,7 @@
             "elements": [
                 {
                     "type": "station",
-                    "name": "Кунцевская",
+                    "name": "Курская",
                     "name_offset": [
                         20,
                         0
@@ -45,8 +45,8 @@
                     "type": "station",
                     "name": "Беговая",
                     "name_offset": [
-                        -16,
-                        10
+                        -20,
+                        6
                     ],
                     "name_relative_to": "right"
                 },
@@ -121,7 +121,7 @@
             "planned_line_filename": "planned_blue.png",
             "logo_filename": "blue_logo.png",
             "type": "metro",
-            "priority": 2,
+            "priority": 3,
             "start_logo_offset": [
                 0,
                 -30
@@ -169,20 +169,20 @@
                 },
                 {
                     "type": "line_segment",
-                    "length": 85
+                    "length": 60
                 },
                 {
                     "type": "station",
-                    "name": "Курская",
+                    "name": "Кунцевская",
                     "name_offset": [
                         0,
-                        -20
+                        20
                     ],
-                    "name_relative_to": "down"
+                    "name_relative_to": "up"
                 },
                 {
                     "type": "line_segment",
-                    "length": 115
+                    "length": 140
                 },
                 {
                     "type": "station",
@@ -235,6 +235,63 @@
                         -20
                     ],
                     "name_relative_to": "down"
+                }
+            ]
+        },
+        {
+            "name": "Филёвская",
+            "line_color": "#03BFFF",
+            "logo_filename": "cyan_logo.png",
+            "type": "metro",
+            "priority": 2,
+            "start_logo_offset": [
+                null,
+                null
+            ],
+            "end_logo_offset": [
+                0,
+                30
+            ],
+            "start": [
+                410,
+                360
+            ],
+            "direction": "right",
+            "elements": [
+                {
+                    "type": "station",
+                    "name": "Беговая",
+                    "hide_name": true
+                },
+                {
+                    "type": "line_segment",
+                    "length": 140
+                },
+                {
+                    "type": "station",
+                    "name": "Кунцевская",
+                    "hide_name": true
+                },
+                {
+                    "type": "line_segment",
+                    "length": 80
+                },
+                {
+                    "type": "turn",
+                    "direction": "down"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 150
+                },
+                {
+                    "type": "station",
+                    "name": "Лефортово",
+                    "name_offset": [
+                        20,
+                        0
+                    ],
+                    "name_relative_to": "left"
                 }
             ]
         },
@@ -417,8 +474,8 @@
         },
         {
             "station1": {
-                "line_name": "Беговая",
-                "station_name": "Курская"
+                "line_name": "Филёвская",
+                "station_name": "Кунцевская"
             },
             "station2": {
                 "line_name": "Первый диаметр",
@@ -436,6 +493,28 @@
                 "station_name": "Возрождение"
             },
             "is_direct": false
+        },
+        {
+            "station1": {
+                "line_name": "Беговая",
+                "station_name": "Беговая"
+            },
+            "station2": {
+                "line_name": "Филёвская",
+                "station_name": "Беговая"
+            },
+            "is_direct": true
+        },
+        {
+            "station1": {
+                "line_name": "Беговая",
+                "station_name": "Кунцевская"
+            },
+            "station2": {
+                "line_name": "Филёвская",
+                "station_name": "Кунцевская"
+            },
+            "is_direct": true
         }
     ]
 }
