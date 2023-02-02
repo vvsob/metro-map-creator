@@ -28,13 +28,12 @@ metro_map = metro_map_drawer.get_metro_map()
 metro_map.save(filename=os.path.join('output', 'metro_map.png'))
 
 for line in map_data['lines']:
+    is_bidirectional = line['name'] in ['Первый диаметр', 'Второй диаметр', 'Филёвская']
     for element in line['elements']:
         if element['type'] == 'station':
             for reverse_direction in [0, 1]:
-                if line['name'] == 'Филёвская' and reverse_direction == 1:
-                    continue
                 linear_metro_map = metro_map_drawer.get_linear_metro_map(reverse_direction, line['name'],
-                                                                         element['name'], line['name'] == 'Филёвская')
+                                                                         element['name'], is_bidirectional)
 
                 linear_metro_map.save(filename=os.path.join('output', format_filename('linear_' + line['name'] + '_' +
                                                                                       element['name'] + '_' +

@@ -302,22 +302,44 @@
             "type": "mcd",
             "priority": 1,
             "start_logo_offset": [
-                0,
-                -30
+                45,
+                0
             ],
             "end_logo_offset": [
                 0,
                 30
             ],
             "start": [
-                670,
-                350
+                690,
+                275
             ],
-            "direction": "down",
+            "direction": "left",
             "elements": [
                 {
                     "type": "station",
+                    "name": "Аванпост",
+                    "name_offset": [
+                        0,
+                        -20
+                    ],
+                    "name_relative_to": "down"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 40
+                },
+                {
+                    "type": "turn",
+                    "direction": "down"
+                },
+                {
+                    "type": "line_segment",
+                    "length": 75
+                },
+                {
+                    "type": "station",
                     "name": "Крайняя",
+                    "orientation": "right",
                     "name_offset": [
                         20,
                         0
@@ -334,7 +356,7 @@
                 },
                 {
                     "type": "line_segment",
-                    "length": 190
+                    "length": 170
                 },
                 {
                     "type": "station",
@@ -387,7 +409,7 @@
                 },
                 {
                     "type": "station",
-                    "name": "Крепость",
+                    "name": "Адская крепость",
                     "name_offset": [
                         20,
                         0
@@ -407,7 +429,7 @@
                 null
             ],
             "end_logo_offset": [
-                -50,
+                -45,
                 0
             ],
             "start": [

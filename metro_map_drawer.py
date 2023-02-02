@@ -357,7 +357,7 @@ class MetroMapDrawer:
         last_bottom = 0
         is_top = True
         for station in stations:
-            if station.is_transfer() or station == stations[len(stations) - 1]:
+            if station.is_transfer() or station == stations[len(stations) - 1] or station.name == start_station_name:
                 is_top = True
 
             name_length = get_text_image(station.name, temp_image, self.map_data.font_filename).width
