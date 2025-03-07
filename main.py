@@ -16,7 +16,7 @@ def format_filename(filename):
 
 
 def draw_full_map(args):
-    map_data = MapData(json.loads(open(os.path.join(args.datapath, 'map_data.json'), 'r').read()))
+    map_data = MapData(json.loads(args.map_data.read()), args.assets)
 
     if not os.path.exists('output'):
         os.mkdir('output')
@@ -28,7 +28,7 @@ def draw_full_map(args):
 
 
 def draw_linear_map(args):
-    map_data = MapData(json.loads(open(os.path.join(args.datapath, 'map_data.json'), 'r').read()))
+    map_data = MapData(json.loads(args.map_data.read()), args.assets)
 
     if args.all:
         lines = map_data.lines
@@ -62,21 +62,22 @@ def main():
 
     subparsers = parser.add_subparsers(dest='command', help="Available commands", required=True)
 
-    full_parser = subparsers.add_parser('full', help="Draw the complete metro map")
-    full_parser.add_argument('datapath', type=pathlib.Path, help="path to the asset folder")
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    parent_parser.add_argument('map_data', type=argparse.FileType('r'))
+    parent_parser.add_argument('assets', type=pathlib.Path, help="path to the asset folder")
+    parent_parser.add_argument('-v', "--verbose", action='count', default=0, help="verbosity")
+
+    full_parser = subparsers.add_parser('full', parents=[parent_parser], help="Draw the complete metro map")
     full_parser.add_argument('-o', '--output', default='./metro_map.png', type=argparse.FileType('w'),
                              help="name of the output file")
-    full_parser.add_argument('-v', "--verbose", action='count', default=0, help="verbosity")
     full_parser.set_defaults(func=draw_full_map)
 
-    linear_parser = subparsers.add_parser('linear', help="Draw the linear map for a station")
-    linear_parser.add_argument('datapath', type=pathlib.Path, help="path to the asset folder")
+    linear_parser = subparsers.add_parser('linear', parents=[parent_parser], help="Draw the linear map for a station")
     linear_parser.add_argument('-l', '--lines', action='extend', nargs='+', default=[],
                                help="name of the lines to be drawn")
     linear_parser.add_argument('--all', action='store_true', help="render all lines")
     linear_parser.add_argument('-o', '--output', default="./output", type=pathlib.Path,
                                help="name of the output folder")
-    linear_parser.add_argument('-v', "--verbose", action='count', default=0, help="verbosity")
     linear_parser.set_defaults(func=draw_linear_map)
 
     args = parser.parse_args()
