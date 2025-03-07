@@ -41,11 +41,10 @@ def draw_linear_map(args):
 
     for i, line in enumerate(lines):
         logging.info(f"[{i + 1} / {len(lines)}] Rendering {line.name}")
-        is_bidirectional = line.name in ['Первый диаметр', 'Второй диаметр', 'Филёвская']
         for element in line.elements:
             if isinstance(element, Station):
                 for reverse_direction in [0, 1]:
-                    linear_metro_map = line.get_linear_metro_map(reverse_direction, element.name, is_bidirectional)
+                    linear_metro_map = line.get_linear_metro_map(reverse_direction, element.name)
 
                     linear_metro_map.save(filename=os.path.join('output', format_filename('linear_' + line.name + '_' +
                                                                                           element.name + '_' +

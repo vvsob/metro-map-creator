@@ -116,6 +116,7 @@ class Line:
 
         self.type = line_json.get('type')
         self.priority = line_json.get('priority')
+        self.bidirectional = line_json.get('bidirectional', False)
 
         self.start_logo_offset = tuple(line_json.get('start_logo_offset'))
         if self.start_logo_offset[0] is None or self.start_logo_offset[1] is None:
@@ -332,7 +333,7 @@ class Line:
                        last_station_center[1] + self.end_logo_offset[1]],
                       RelativeTo.CENTER)
 
-    def get_linear_metro_map(self, reverse_direction, start_station_name=None, is_bidirectional=False):
+    def get_linear_metro_map(self, reverse_direction, start_station_name=None):
         start_station = self.get_station(start_station_name)
 
         elements = list(self.elements)
@@ -340,7 +341,7 @@ class Line:
             elements = list(reversed(elements))
 
         is_first_station = True
-        if not is_bidirectional:
+        if not self.bidirectional:
             if start_station_name is not None:
                 for (num, element) in enumerate(elements):
                     if isinstance(element, Station) and not element.is_actually_planned():
@@ -350,7 +351,7 @@ class Line:
                         is_first_station = False
 
         stations = [element for element in elements if isinstance(element, Station)]
-        if not is_bidirectional:
+        if not self.bidirectional:
             for (num, station) in enumerate(stations):
                 if station.is_actually_planned():
                     stations = stations[:num]
@@ -406,11 +407,11 @@ class Line:
         direction_image = get_direction_image(self.logo_image, stations[len(stations) - 1].name,
                                               self.map_data.font_path)
         reverse_direction_image = None
-        if not (is_bidirectional and start_station_name == stations[len(stations) - 1].name):
+        if not (self.bidirectional and start_station_name == stations[len(stations) - 1].name):
             total_width += direction_image.width
         else:
             total_width += 20
-        if is_bidirectional and not start_station_name == stations[0].name:
+        if self.bidirectional and not start_station_name == stations[0].name:
             reverse_direction_image = get_direction_image(self.logo_image, stations[0].name,
                                                           self.map_data.font_path, True)
             total_width += reverse_direction_image.width
@@ -434,9 +435,9 @@ class Line:
         linear_metro_map_image = Image(width=total_width, height=128, background=Color('white'))
         linear_metro_map_image.virtual_pixel = 'transparent'
 
-        if not (is_bidirectional and start_station_name == stations[len(stations) - 1].name):
+        if not (self.bidirectional and start_station_name == stations[len(stations) - 1].name):
             linear_metro_map_image.composite(direction_image)
-        if is_bidirectional and not start_station_name == stations[0].name:
+        if self.bidirectional and not start_station_name == stations[0].name:
             linear_metro_map_image.composite(reverse_direction_image, left=linear_metro_map_image.width -
                                              reverse_direction_image.width)
             linear_line.start = (linear_line.start[0] - reverse_direction_image.width, linear_line.start[1])
