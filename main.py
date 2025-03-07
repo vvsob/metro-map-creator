@@ -1,3 +1,7 @@
+import argparse
+import logging
+import pathlib
+
 from transliterate import translit
 
 import datetime
@@ -11,27 +15,83 @@ def format_filename(filename):
     return translit(filename.replace(' ', '_').replace('\n', '_'), "ru", reversed=True)
 
 
-start_time = datetime.datetime.now()
+def draw_full_map(args):
+    map_data = MapData(json.loads(open(os.path.join(args.datapath, 'map_data.json'), 'r').read()))
 
-map_data = MapData(json.loads(open(os.path.join('input', 'map_data.json'), 'r').read()))
+    if not os.path.exists('output'):
+        os.mkdir('output')
+    for file in os.listdir('output'):
+        os.remove(os.path.join('output', file))
 
-if not os.path.exists('output'):
-    os.mkdir('output')
-for file in os.listdir('output'):
-    os.remove(os.path.join('output', file))
+    metro_map = map_data.draw()
+    metro_map.save(filename=args.output.name)
 
-metro_map = map_data.draw()
-metro_map.save(filename=os.path.join('output', 'metro_map.png'))
 
-for line in map_data.lines:
-    is_bidirectional = line.name in ['Первый диаметр', 'Второй диаметр', 'Филёвская']
-    for element in line.elements:
-        if isinstance(element, Station):
-            for reverse_direction in [0, 1]:
-                linear_metro_map = line.get_linear_metro_map(reverse_direction, element.name, is_bidirectional)
+def draw_linear_map(args):
+    map_data = MapData(json.loads(open(os.path.join(args.datapath, 'map_data.json'), 'r').read()))
 
-                linear_metro_map.save(filename=os.path.join('output', format_filename('linear_' + line.name + '_' +
-                                                                                      element.name + '_' +
-                                                                                      str(reverse_direction) + '.png')))
+    if args.all:
+        lines = map_data.lines
+    else:
+        lines = [l for l in map_data.lines if l.name in args.lines]
 
-print(f'Generating completed in {int((datetime.datetime.now() - start_time).total_seconds() * 1000)} ms')
+    if not lines:
+        print("No lines to render")
+        return
+
+    for i, line in enumerate(lines):
+        logging.info(f"[{i + 1} / {len(lines)}] Rendering {line.name}")
+        is_bidirectional = line.name in ['Первый диаметр', 'Второй диаметр', 'Филёвская']
+        for element in line.elements:
+            if isinstance(element, Station):
+                for reverse_direction in [0, 1]:
+                    linear_metro_map = line.get_linear_metro_map(reverse_direction, element.name, is_bidirectional)
+
+                    linear_metro_map.save(filename=os.path.join('output', format_filename('linear_' + line.name + '_' +
+                                                                                          element.name + '_' +
+                                                                                          str(reverse_direction) + '.png')))
+
+    print(f"Rendered {len(lines)} lines")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="metro-map-creator",
+        description="a tool for creating metro maps using json data"
+    )
+
+    subparsers = parser.add_subparsers(dest='command', help="Available commands", required=True)
+
+    full_parser = subparsers.add_parser('full', help="Draw the complete metro map")
+    full_parser.add_argument('datapath', type=pathlib.Path, help="path to the asset folder")
+    full_parser.add_argument('-o', '--output', default='./metro_map.png', type=argparse.FileType('w'),
+                             help="name of the output file")
+    full_parser.add_argument('-v', "--verbose", action='count', default=0, help="verbosity")
+    full_parser.set_defaults(func=draw_full_map)
+
+    linear_parser = subparsers.add_parser('linear', help="Draw the linear map for a station")
+    linear_parser.add_argument('datapath', type=pathlib.Path, help="path to the asset folder")
+    linear_parser.add_argument('-l', '--lines', action='extend', nargs='+', default=[],
+                               help="name of the lines to be drawn")
+    linear_parser.add_argument('--all', action='store_true', help="render all lines")
+    linear_parser.add_argument('-o', '--output', default="./output", type=pathlib.Path,
+                               help="name of the output folder")
+    linear_parser.add_argument('-v', "--verbose", action='count', default=0, help="verbosity")
+    linear_parser.set_defaults(func=draw_linear_map)
+
+    args = parser.parse_args()
+
+    if args.verbose == 1:
+        logging.getLogger().setLevel(logging.INFO)
+    if args.verbose >= 2:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    start_time = datetime.datetime.now()
+
+    args.func(args)
+
+    print(f'Generating completed in {int((datetime.datetime.now() - start_time).total_seconds() * 1000)} ms')
+
+
+if __name__ == "__main__":
+    main()
