@@ -97,25 +97,26 @@ class Line:
         self.name = line_json.get('name')
 
         if 'line_filename' in line_json:
-            self.line_image = Image(filename=os.path.join('input', 'images', line_json.get('line_filename')))
+            self.line_image = Image(filename=os.path.join(self.map_data.assets_path, 'images', line_json.get('line_filename')))
         else:
             self.line_image = Image(width=1, height=9, background=Color(line_json['line_color']))
 
         if 'planned_line_filename' in line_json:
-            self.planned_line_image = Image(filename=os.path.join('input', 'images',
+            self.planned_line_image = Image(filename=os.path.join(self.map_data.assets_path, 'images',
                                                                   line_json.get('planned_line_filename')))
         elif 'planned_line_color' in line_json:
             self.planned_line_image = Image(width=1, height=9, background=Color(line_json['planned_line_color']))
         else:
             self.planned_line_image = None
 
-        self.logo_image = Image(filename=os.path.join('input', 'images', line_json.get('logo_filename')))
+        self.logo_image = Image(filename=os.path.join(self.map_data.assets_path, 'images', line_json.get('logo_filename')))
         self.logo_image.resize(int(round(self.logo_image.width /
                                          (self.logo_image.height / (self.line_image.height * 3))) + 0.5),
                                self.line_image.height * 3)
 
         self.type = line_json.get('type')
         self.priority = line_json.get('priority')
+        self.bidirectional = line_json.get('bidirectional', False)
 
         self.start_logo_offset = tuple(line_json.get('start_logo_offset'))
         if self.start_logo_offset[0] is None or self.start_logo_offset[1] is None:
@@ -245,25 +246,25 @@ class Line:
         return position, direction
 
     @staticmethod
-    def draw_station_name(metro_map_image, station, font_filename, highlight_color=None):
+    def draw_station_name(metro_map_image, station, font_path, highlight_color=None):
         if not station.hide_name:
             if highlight_color is None:
-                text_image = get_text_image(station.name, metro_map_image, font_filename)
+                text_image = get_text_image(station.name, metro_map_image, font_path)
             else:
-                text_image = get_text_image(station.name, metro_map_image, font_filename,
+                text_image = get_text_image(station.name, metro_map_image, font_path,
                                             Color('white'), highlight_color)
 
             place(metro_map_image, text_image, (station.position[0] + station.name_offset[0],
                                                 station.position[1] + station.name_offset[1]),
                   RelativeTo[station.name_relative_to.upper()])
 
-    def draw_stations_names(self, metro_map_image, font_filename, highlighted_station):
+    def draw_stations_names(self, metro_map_image, font_path, highlighted_station):
         for element in self.elements:
             if isinstance(element, Station):
                 highlight_color = None
                 if element == highlighted_station:
                     highlight_color = self.line_image[0, 0]
-                Line.draw_station_name(metro_map_image, element, font_filename, highlight_color)
+                Line.draw_station_name(metro_map_image, element, font_path, highlight_color)
 
     def draw(self, metro_map_image):
         position = self.start
@@ -332,7 +333,7 @@ class Line:
                        last_station_center[1] + self.end_logo_offset[1]],
                       RelativeTo.CENTER)
 
-    def get_linear_metro_map(self, reverse_direction, start_station_name=None, is_bidirectional=False):
+    def get_linear_metro_map(self, reverse_direction, start_station_name=None):
         start_station = self.get_station(start_station_name)
 
         elements = list(self.elements)
@@ -340,7 +341,7 @@ class Line:
             elements = list(reversed(elements))
 
         is_first_station = True
-        if not is_bidirectional:
+        if not self.bidirectional:
             if start_station_name is not None:
                 for (num, element) in enumerate(elements):
                     if isinstance(element, Station) and not element.is_actually_planned():
@@ -350,7 +351,7 @@ class Line:
                         is_first_station = False
 
         stations = [element for element in elements if isinstance(element, Station)]
-        if not is_bidirectional:
+        if not self.bidirectional:
             for (num, station) in enumerate(stations):
                 if station.is_actually_planned():
                     stations = stations[:num]
@@ -374,7 +375,7 @@ class Line:
             if station.is_transfer() or station == stations[len(stations) - 1] or station.name == start_station_name:
                 is_top = True
 
-            name_length = get_text_image(station.name, temp_image, self.map_data.font_filename).width
+            name_length = get_text_image(station.name, temp_image, self.map_data.font_path).width
 
             transfer_lines = station.get_transfer_lines()
             transfers_length = max(0, 10 * (len(transfer_lines) - 1))
@@ -404,15 +405,15 @@ class Line:
         total_width = max(last_top, last_bottom)
 
         direction_image = get_direction_image(self.logo_image, stations[len(stations) - 1].name,
-                                              self.map_data.font_filename)
+                                              self.map_data.font_path)
         reverse_direction_image = None
-        if not (is_bidirectional and start_station_name == stations[len(stations) - 1].name):
+        if not (self.bidirectional and start_station_name == stations[len(stations) - 1].name):
             total_width += direction_image.width
         else:
             total_width += 20
-        if is_bidirectional and not start_station_name == stations[0].name:
+        if self.bidirectional and not start_station_name == stations[0].name:
             reverse_direction_image = get_direction_image(self.logo_image, stations[0].name,
-                                                          self.map_data.font_filename, True)
+                                                          self.map_data.font_path, True)
             total_width += reverse_direction_image.width
 
         linear_line = copy.copy(self)
@@ -434,9 +435,9 @@ class Line:
         linear_metro_map_image = Image(width=total_width, height=128, background=Color('white'))
         linear_metro_map_image.virtual_pixel = 'transparent'
 
-        if not (is_bidirectional and start_station_name == stations[len(stations) - 1].name):
+        if not (self.bidirectional and start_station_name == stations[len(stations) - 1].name):
             linear_metro_map_image.composite(direction_image)
-        if is_bidirectional and not start_station_name == stations[0].name:
+        if self.bidirectional and not start_station_name == stations[0].name:
             linear_metro_map_image.composite(reverse_direction_image, left=linear_metro_map_image.width -
                                              reverse_direction_image.width)
             linear_line.start = (linear_line.start[0] - reverse_direction_image.width, linear_line.start[1])
@@ -470,7 +471,7 @@ class Line:
                     cur_logo_pos += transfer_logo.width + 10
 
         linear_line.draw(linear_metro_map_image)
-        linear_line.draw_stations_names(linear_metro_map_image, self.map_data.font_filename, start_station)
+        linear_line.draw_stations_names(linear_metro_map_image, self.map_data.font_path, start_station)
 
         round_corners(linear_metro_map_image, 10)
 
@@ -561,13 +562,14 @@ class Transfer:
 
 
 class MapData:
-    def __init__(self, map_data_json: Dict[str, Any]):
+    def __init__(self, map_data_json: Dict[str, Any], assets_path):
+        self.assets_path = assets_path
         self.image_resolution = tuple(map_data_json['image_resolution'])
-        self.info_image = Image(filename=os.path.join('input', 'images', map_data_json['info_filename']))
-        self.font_filename = map_data_json['font_filename']
+        self.info_image = Image(filename=os.path.join(assets_path, 'images', map_data_json['info_filename']))
+        self.font_path = os.path.join(assets_path, "fonts", map_data_json['font_filename'])
 
         if 'no_boarding_filename' in map_data_json:
-            self.no_boarding_image = Image(filename=os.path.join('input', 'images',
+            self.no_boarding_image = Image(filename=os.path.join(assets_path, 'images',
                                                                  map_data_json['no_boarding_filename']))
         else:
             self.no_boarding_image = None
@@ -600,7 +602,7 @@ class MapData:
         for line in self.lines:
             if line.name is not None:
                 max_text_length = max(max_text_length,
-                                      get_text_image(line.name, metro_map_image, self.font_filename).width)
+                                      get_text_image(line.name, metro_map_image, self.font_path).width)
         return max_text_length
 
     def draw_lines_info(self, metro_map_image):
@@ -613,7 +615,7 @@ class MapData:
             line.line_image.resize(width=100)
             place(lines_image, line.line_image, [70, cur_top + 20], RelativeTo.LEFT)
 
-            place(lines_image, get_text_image(line.name, metro_map_image, self.font_filename),
+            place(lines_image, get_text_image(line.name, metro_map_image, self.font_path),
                   [190, cur_top + 20], RelativeTo.LEFT)
 
             cur_top += 33
@@ -634,7 +636,7 @@ class MapData:
         for transfer in self.transfers:
             transfer.draw(metro_map_image)
         for line in self.lines:
-            line.draw_stations_names(metro_map_image, self.font_filename, highlighted_station)
+            line.draw_stations_names(metro_map_image, self.font_path, highlighted_station)
         self.draw_lines_info(metro_map_image)
         self.draw_info(metro_map_image)
         return metro_map_image

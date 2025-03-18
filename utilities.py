@@ -77,7 +77,7 @@ def move_by_image(coords, image, direction):
         return move(coords, image.height, Direction[direction.upper()])
 
 
-def get_text_image(text, image, font_filename, font_color=Color('black'), background_color=Color('#FFFFFF80')):
+def get_text_image(text, image, font_path, font_color=Color('black'), background_color=Color('#FFFFFF80')):
     padding_size = (5, 3)
 
     if font_color == Color('black'):
@@ -85,7 +85,7 @@ def get_text_image(text, image, font_filename, font_color=Color('black'), backgr
 
     draw = Drawing()
     draw.fill_color = font_color
-    draw.font = os.path.join('input', 'fonts', font_filename)
+    draw.font = font_path
     draw.font_size = 18
     res_image = Image(width=int(draw.get_font_metrics(image, text, multiline=True).text_width + 2 * padding_size[0]),
                       height=int(draw.get_font_metrics(image, text, multiline=True).text_height + 2 * padding_size[1]),
@@ -112,8 +112,8 @@ def get_arrow_image(size, color=Color('black'), background=Color('white')):
     return image
 
 
-def get_direction_image(logo_image, last_station_name, font_filename, reverse_direction=False):
-    last_station_name_image = get_text_image(last_station_name, logo_image, font_filename)
+def get_direction_image(logo_image, last_station_name, font_path, reverse_direction=False):
+    last_station_name_image = get_text_image(last_station_name, logo_image, font_path)
     image_width = 20 + 27 + 10 + logo_image.width + 10 + last_station_name_image.width + 20
 
     direction_image = Image(width=image_width, height=128, background=Color('white'))
