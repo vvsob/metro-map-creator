@@ -141,7 +141,7 @@ class Station(Element):
         combined_text_image = Image(width=max(text_image.width, translit_text_image.width),
                                     height=max(text_image.height, 6 + translit_text_image.height) * 2)
         place(combined_text_image, text_image, (0, combined_text_image.height // 2), RelativeTo.LEFT_DOWN)
-        place(combined_text_image, translit_text_image, (0, combined_text_image.height // 2 + 6), RelativeTo.TOP_LEFT)
+        place(combined_text_image, translit_text_image, (-4, combined_text_image.height // 2 + 6), RelativeTo.TOP_LEFT)
 
         content_image = Image(width=logos_image.width + 16 + combined_text_image.width,
                               height=max(logos_image.height, combined_text_image.height))
