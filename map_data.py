@@ -105,7 +105,9 @@ class Station(Element):
         return transfer_lines
 
     def get_sign_image(self, width, height, transfer_rendering=True):
-        sign_image = Image(width=width, height=height, background=Color('white'))
+        frame_size = 4
+
+        sign_image = Image(width=width - frame_size * 2, height=height - frame_size * 2, background=Color('white'))
         sign_image.virtual_pixel = 'transparent'
 
         lines = [self.line]
@@ -136,18 +138,24 @@ class Station(Element):
             else:
                 logos_image = line_logo
 
-        place(sign_image, logos_image, (32, 64), RelativeTo.LEFT)
+        place(sign_image, logos_image, (32, sign_image.height // 2), RelativeTo.LEFT)
 
         text_image = get_text_image(self.name, sign_image, self.line.map_data.font_path, font_size=30)
-        place(sign_image, text_image, (48 + logos_image.width, 64), RelativeTo.LEFT_DOWN)
+        place(sign_image, text_image, (48 + logos_image.width, sign_image.height // 2), RelativeTo.LEFT_DOWN)
 
         translit_name = transliterate.translit(self.name, 'ru', reversed=True)
         translit_text_image = get_text_image(translit_name, sign_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
-        place(sign_image, translit_text_image, (46 + logos_image.width, 70), RelativeTo.TOP_LEFT)
+        place(sign_image, translit_text_image, (46 + logos_image.width, sign_image.height // 2 + 6), RelativeTo.TOP_LEFT)
 
-        round_corners(sign_image, 10)
+        round_corners(sign_image, 10 - frame_size)
 
-        return sign_image
+        frame = Image(width=width, height=height, background=Color('#444450FF'), )
+
+        place(frame, sign_image, (frame_size, frame_size), RelativeTo.TOP_LEFT)
+
+        round_corners(frame, 10)
+
+        return frame
 
 
 class Line:
