@@ -108,43 +108,42 @@ class Station(Element):
         sign_image = Image(width=width, height=height, background=Color('white'))
         sign_image.virtual_pixel = 'transparent'
 
-        logo_image = self.line.logo_image
-        logo_image.resize(round(
-            logo_image.width
-            / (logo_image.height / 48)
-        ), 48)
+        lines = [self.line]
 
         if transfer_rendering:
-            logos_image = self.line.logo_image
-
             transfer_lines = list(self.get_transfer_lines())
-            transfer_lines.sort(key=lambda l: l.map_data.lines.index(l))
+            lines.extend(transfer_lines)
+            lines.sort(key=lambda l: l.map_data.lines.index(l))
 
-            for i, transfer_line in enumerate(transfer_lines):
-                transfer_logo = transfer_line.logo_image
-                transfer_logo.resize(round(
-                    transfer_logo.width
-                    / (transfer_logo.height / 48)
-                ), 48)
+        logos_image = None
 
-                spacing = 16
-                if ((i > 0 and transfer_lines[i - 1].type == "mcd") or (i == 0 and self.line.type == "mcd")) and transfer_line.type == "mcd":
-                    spacing = -10
+        for i, transfer_line in enumerate(lines):
+            line_logo = transfer_line.logo_image
+            line_logo.resize(round(
+                line_logo.width
+                / (line_logo.height / 48)
+            ), 48)
 
-                temp_image = Image(width=logos_image.width + spacing + transfer_logo.width, height=logos_image.height)
+            spacing = 16
+            if i > 0 and lines[i - 1].type == "mcd" and transfer_line.type == "mcd":
+                spacing = -10
+
+            if i > 0:
+                temp_image = Image(width=logos_image.width + spacing + line_logo.width, height=logos_image.height)
                 place(temp_image, logos_image, (0, 0), RelativeTo.TOP_LEFT)
-                place(temp_image, transfer_logo, (temp_image.width, temp_image.height // 2), RelativeTo.RIGHT)
+                place(temp_image, line_logo, (temp_image.width - 1, temp_image.height // 2), RelativeTo.RIGHT)
                 logos_image = temp_image
-            logo_image = logos_image
+            else:
+                logos_image = line_logo
 
-        place(sign_image, logo_image, (32, 64), RelativeTo.LEFT)
+        place(sign_image, logos_image, (32, 64), RelativeTo.LEFT)
 
         text_image = get_text_image(self.name, sign_image, self.line.map_data.font_path, font_size=30)
-        place(sign_image, text_image, (48 + logo_image.width, 64), RelativeTo.LEFT_DOWN)
+        place(sign_image, text_image, (48 + logos_image.width, 64), RelativeTo.LEFT_DOWN)
 
         translit_name = transliterate.translit(self.name, 'ru', reversed=True)
         translit_text_image = get_text_image(translit_name, sign_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
-        place(sign_image, translit_text_image, (46 + logo_image.width, 70), RelativeTo.TOP_LEFT)
+        place(sign_image, translit_text_image, (46 + logos_image.width, 70), RelativeTo.TOP_LEFT)
 
         round_corners(sign_image, 10)
 
