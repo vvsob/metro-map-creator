@@ -65,6 +65,34 @@ def draw_linear_map(args):
     print(f"Rendered {len(lines)} lines")
 
 
+def draw_station_sign(args):
+    map_data = MapData(json.loads(args.map_data.read()), args.assets)
+
+    if args.all_lines:
+        lines = map_data.lines
+    else:
+        lines = [line for line in map_data.lines if line.name in args.lines]
+
+    for i, line in enumerate(lines):
+        for element in line.elements:
+            if isinstance(element, Station):
+                if not args.all_stations and element.name not in args.stations:
+                    continue
+                station_sign = element.get_sign_image(args.width, args.height, args.transfers)
+                station_sign.save(
+                    filename=os.path.join(
+                        args.output,
+                        format_filename(
+                            "sign_"
+                            + line.name
+                            + "_"
+                            + element.name
+                            + ".png"
+                        ),
+                    )
+                )
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="metro-map-creator",
@@ -116,6 +144,57 @@ def main():
         help="name of the output folder",
     )
     linear_parser.set_defaults(func=draw_linear_map)
+
+    station_parser = subparsers.add_parser(
+        "station", parents=[parent_parser], help='Draw the station entrance sign'
+    )
+    station_parser.add_argument(
+        "-l",
+        "--lines",
+        action="extend",
+        nargs="+",
+        default=[],
+        help="select the lines to be drawn",
+    )
+    station_parser.add_argument("--all_lines", action="store_true", help="select all lines")
+
+    station_parser.add_argument(
+        "-s",
+        "--stations",
+        action="extend",
+        nargs="+",
+        default=[],
+        help="select the stations to be drawn",
+    )
+    station_parser.add_argument("--all_stations", action="store_true", help="render all stations on selected lines")
+    station_parser.add_argument(
+        "-o",
+        "--output",
+        default="./output",
+        type=pathlib.Path,
+        help="name of the output folder",
+    )
+    station_parser.add_argument(
+        '-W',
+        "--width",
+        default=3 * 128,
+        type=int,
+        help="width of the sign in pixels",
+    )
+    station_parser.add_argument(
+        '-H',
+        "--height",
+        default=128,
+        type=int,
+        help="height of the sign in pixels",
+    )
+    station_parser.add_argument(
+        "--transfers",
+        default=False,
+        action="store_true",
+        help="show transfer lines on signs"
+    )
+    station_parser.set_defaults(func=draw_station_sign)
 
     args = parser.parse_args()
 
