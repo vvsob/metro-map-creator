@@ -81,12 +81,12 @@ def move_by_image(coords, image, direction):
 
 
 def get_text_image(
-    text,
-    image,
-    font_path,
-    font_color=Color("black"),
-    background_color=Color("#FFFFFF80"),
-    font_size=18
+        text,
+        image,
+        font_path,
+        font_color=Color("black"),
+        background_color=Color("#FFFFFF80"),
+        font_size=18
 ):
     padding_size = (5, 3)
 
@@ -131,11 +131,11 @@ def get_arrow_image(size, color=Color("black"), background=Color("white")):
 
 
 def get_direction_image(
-    logo_image, last_station_name, font_path, reverse_direction=False
+        logo_image, last_station_name, font_path, reverse_direction=False
 ):
     last_station_name_image = get_text_image(last_station_name, logo_image, font_path)
     image_width = (
-        20 + 27 + 10 + logo_image.width + 10 + last_station_name_image.width + 20
+            20 + 27 + 10 + logo_image.width + 10 + last_station_name_image.width + 20
     )
 
     direction_image = Image(width=image_width, height=128, background=Color("white"))
@@ -171,16 +171,16 @@ def get_direction_image(
 
 def round_corner(image, radius, coords, positive_dx, positive_dy):
     for x in (
-        range(coords[0], coords[0] + radius + 1)
-        if positive_dx
-        else range(coords[0] - radius, coords[0] + 1)
+            range(coords[0], coords[0] + radius + 1)
+            if positive_dx
+            else range(coords[0] - radius, coords[0] + 1)
     ):
         for y in (
-            range(coords[1], coords[1] + radius + 1)
-            if positive_dy
-            else range(coords[1] - radius, coords[1] + 1)
+                range(coords[1], coords[1] + radius + 1)
+                if positive_dy
+                else range(coords[1] - radius, coords[1] + 1)
         ):
-            if (x - coords[0]) ** 2 + (y - coords[1]) ** 2 > radius**2:
+            if (x - coords[0]) ** 2 + (y - coords[1]) ** 2 > radius ** 2:
                 image[x, y] = Color("#FFFFFF00")
 
 

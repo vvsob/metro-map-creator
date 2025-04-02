@@ -80,18 +80,17 @@ def draw_station_sign(args):
                     continue
                 station_sign = element.get_sign_image(args.width, args.height, args.transfers)
                 station_sign.save(
-                        filename=os.path.join(
-                            args.output,
-                            format_filename(
-                                "sign_"
-                                + line.name
-                                + "_"
-                                + element.name
-                                + ".png"
-                            ),
-                        )
+                    filename=os.path.join(
+                        args.output,
+                        format_filename(
+                            "sign_"
+                            + line.name
+                            + "_"
+                            + element.name
+                            + ".png"
+                        ),
                     )
-
+                )
 
 
 def main():
@@ -178,7 +177,7 @@ def main():
     station_parser.add_argument(
         '-W',
         "--width",
-        default=3*128,
+        default=3 * 128,
         type=int,
         help="width of the sign in pixels",
     )

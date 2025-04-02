@@ -51,7 +51,7 @@ def get_arc(line, turn):
 
 @lru_cache(maxsize=10)
 def get_end_station(line, orientation):
-    end_station = Image(width=line.height, height=3*line.height)
+    end_station = Image(width=line.height, height=3 * line.height)
     end_station.virtual_pixel = 'transparent'
 
     for x in range(end_station.width):
@@ -75,7 +75,7 @@ def get_end_station(line, orientation):
 
 @lru_cache(maxsize=10)
 def get_station(line, orientation):
-    station = Image(width=2*line.height, height=line.height)
+    station = Image(width=2 * line.height, height=line.height)
     station.virtual_pixel = 'transparent'
 
     for x in range(station.width):
@@ -110,7 +110,7 @@ def get_transfer(line, line_type, orientation):
     base = Image(width=transfer.width, height=transfer.height)
     for x in range(base.width):
         for y in range(base.height):
-            if (x - base.width // 2)**2 + (y - base.height // 2)**2 <= 9**2:
+            if (x - base.width // 2) ** 2 + (y - base.height // 2) ** 2 <= 9 ** 2:
                 base[x, y] = Color('#FFFFFF')
 
     base.composite(transfer)
@@ -128,9 +128,9 @@ def get_transfer(line, line_type, orientation):
             line_part_base[5, i] = line[0, i]
 
     if orientation.name in [Orientation.HORIZONTAL.name, Orientation.VERTICAL.name]:
-        base.composite(line_part_base, top=(base.height-line.height)//2)
+        base.composite(line_part_base, top=(base.height - line.height) // 2)
     line_part_base.flop()
-    base.composite(line_part_base, left=base.width-line_part_base.width, top=(base.height-line.height)//2)
+    base.composite(line_part_base, left=base.width - line_part_base.width, top=(base.height - line.height) // 2)
 
     base.rotate(orientation.value)
 

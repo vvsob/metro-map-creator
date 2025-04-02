@@ -32,7 +32,7 @@ class Element:
 
 class LineSegment(Element):
     def __init__(
-        self, line: "Line", line_segment_json: Dict[str, Any], is_planned=None
+            self, line: "Line", line_segment_json: Dict[str, Any], is_planned=None
     ):
         super().__init__(line, is_planned)
         self.line = line
@@ -89,7 +89,7 @@ class Station(Element):
                 else transfer.stations[1]
             )
             if another_station not in used and not (
-                indirect_limit == 0 and not transfer.is_direct
+                    indirect_limit == 0 and not transfer.is_direct
             ):
                 another_station.get_transfer_stations_rec(
                     used, indirect_limit - (not transfer.is_direct)
@@ -135,19 +135,22 @@ class Station(Element):
 
         text_image = get_text_image(self.name, logos_image, self.line.map_data.font_path, font_size=30)
         translit_name = transliterate.translit(self.name, 'ru', reversed=True)
-        translit_text_image = get_text_image(translit_name, logos_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
+        translit_text_image = get_text_image(translit_name, logos_image, self.line.map_data.font_path,
+                                             font_color=Color("gray"), font_size=18)
 
-        combined_text_image = Image(width=max(text_image.width, translit_text_image.width), height=max(text_image.height, 6 + translit_text_image.height) * 2)
+        combined_text_image = Image(width=max(text_image.width, translit_text_image.width),
+                                    height=max(text_image.height, 6 + translit_text_image.height) * 2)
         place(combined_text_image, text_image, (0, combined_text_image.height // 2), RelativeTo.LEFT_DOWN)
         place(combined_text_image, translit_text_image, (0, combined_text_image.height // 2 + 6), RelativeTo.TOP_LEFT)
 
-        content_image = Image(width = logos_image.width + 16 + combined_text_image.width, height=max(logos_image.height, combined_text_image.height))
+        content_image = Image(width=logos_image.width + 16 + combined_text_image.width,
+                              height=max(logos_image.height, combined_text_image.height))
         place(content_image, logos_image, (0, content_image.height // 2), RelativeTo.LEFT)
         place(content_image, combined_text_image, (logos_image.width + 16, content_image.height // 2), RelativeTo.LEFT)
 
         frame_size = 4
 
-        sign_image = Image(width=width-frame_size * 2, height=height-frame_size * 2, background=Color("#FFFFFFFF"))
+        sign_image = Image(width=width - frame_size * 2, height=height - frame_size * 2, background=Color("#FFFFFFFF"))
         if content_image.width > sign_image.width or content_image.height > sign_image.height:
             logging.warning(f"Content overflow for station {self.name} of {self.line.name}")
         if content_image.width > sign_image.width - 64:
@@ -277,7 +280,7 @@ class Line:
 
     @staticmethod
     def continue_with_first_station(
-        metro_map_image, station, position, direction, station_image
+            metro_map_image, station, position, direction, station_image
     ):
         if not station.is_transfer():
             end_station = get_end_station(
@@ -303,7 +306,7 @@ class Line:
 
     @staticmethod
     def continue_with_station(
-        metro_map_image, station, position, direction, line_image
+            metro_map_image, station, position, direction, line_image
     ):
         image_pos = tuple(position)
 
@@ -332,7 +335,7 @@ class Line:
 
     @staticmethod
     def continue_with_last_station(
-        metro_map_image, station, position, direction, station_image
+            metro_map_image, station, position, direction, station_image
     ):
         if not station.is_transfer():
             end_station = get_end_station(station_image, Orientation[direction.upper()])
@@ -361,12 +364,12 @@ class Line:
                 image_pos[1] += -(turn_image.height // 2)
             else:
                 image_pos[1] += (
-                    -(turn_image.height // 2) - arc.height + turn_image.height
+                        -(turn_image.height // 2) - arc.height + turn_image.height
                 )
         if direction == "down":
             if turn.direction == "left":
                 image_pos[0] += (
-                    -(turn_image.height // 2) + turn_image.height - arc.width
+                        -(turn_image.height // 2) + turn_image.height - arc.width
                 )
             else:
                 image_pos[0] += -(turn_image.height // 2)
@@ -374,7 +377,7 @@ class Line:
             image_pos[0] += -arc.width + 1
             if turn.direction == "up":
                 image_pos[1] += (
-                    -(turn_image.height // 2) - arc.height + turn_image.height
+                        -(turn_image.height // 2) - arc.height + turn_image.height
                 )
             else:
                 image_pos[1] += -(turn_image.height // 2)
@@ -384,7 +387,7 @@ class Line:
                 image_pos[0] += -(turn_image.height // 2)
             else:
                 image_pos[0] += (
-                    -(turn_image.height // 2) + turn_image.height - arc.width
+                        -(turn_image.height // 2) + turn_image.height - arc.width
                 )
 
         place(metro_map_image, arc, image_pos, RelativeTo.TOP_LEFT)
@@ -545,8 +548,8 @@ class Line:
             if start_station_name is not None:
                 for num, element in enumerate(elements):
                     if (
-                        isinstance(element, Station)
-                        and not element.is_actually_planned()
+                            isinstance(element, Station)
+                            and not element.is_actually_planned()
                     ):
                         if element == start_station:
                             elements = elements[num:]
@@ -576,9 +579,9 @@ class Line:
         is_top = True
         for station in stations:
             if (
-                station.is_transfer()
-                or station == stations[len(stations) - 1]
-                or station.name == start_station_name
+                    station.is_transfer()
+                    or station == stations[len(stations) - 1]
+                    or station.name == start_station_name
             ):
                 is_top = True
 
@@ -623,8 +626,8 @@ class Line:
         )
         reverse_direction_image = None
         if not (
-            self.bidirectional
-            and start_station_name == stations[len(stations) - 1].name
+                self.bidirectional
+                and start_station_name == stations[len(stations) - 1].name
         ):
             total_width += direction_image.width
         else:
@@ -659,8 +662,8 @@ class Line:
         linear_metro_map_image.virtual_pixel = "transparent"
 
         if not (
-            self.bidirectional
-            and start_station_name == stations[len(stations) - 1].name
+                self.bidirectional
+                and start_station_name == stations[len(stations) - 1].name
         ):
             linear_metro_map_image.composite(direction_image)
         if self.bidirectional and not start_station_name == stations[0].name:
@@ -699,7 +702,7 @@ class Line:
             if station.is_transfer():
                 cur_logo_pos = station.position[0] - stations_transfers_length[num] // 2
                 for line in reversed(
-                    sorted(station.get_transfer_lines(), key=cmp_to_key(Line.cmp))
+                        sorted(station.get_transfer_lines(), key=cmp_to_key(Line.cmp))
                 ):
                     transfer_logo = line.logo_image_resized
                     place(
