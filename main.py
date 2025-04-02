@@ -78,7 +78,7 @@ def draw_station_sign(args):
             if isinstance(element, Station):
                 if not args.all_stations and element.name not in args.stations:
                     continue
-                station_sign = element.get_sign_image()
+                station_sign = element.get_sign_image(args.width, args.height, args.transfers)
                 station_sign.save(
                         filename=os.path.join(
                             args.output,
@@ -174,6 +174,26 @@ def main():
         default="./output",
         type=pathlib.Path,
         help="name of the output folder",
+    )
+    station_parser.add_argument(
+        '-W',
+        "--width",
+        default=3*128,
+        type=int,
+        help="width of the sign in pixels",
+    )
+    station_parser.add_argument(
+        '-H',
+        "--height",
+        default=128,
+        type=int,
+        help="height of the sign in pixels",
+    )
+    station_parser.add_argument(
+        "--transfers",
+        default=False,
+        action="store_true",
+        help="show transfer lines on signs"
     )
     station_parser.set_defaults(func=draw_station_sign)
 

@@ -104,16 +104,38 @@ class Station(Element):
             transfer_lines.remove(self.line)
         return transfer_lines
 
-    def get_sign_image(self):
-
-        sign_image = Image(width=128*3, height=128, background=Color('white'))
+    def get_sign_image(self, width, height, transfer_rendering=True):
+        sign_image = Image(width=width, height=height, background=Color('white'))
         sign_image.virtual_pixel = 'transparent'
 
         logo_image = self.line.logo_image
         logo_image.resize(round(
-                        logo_image.width
-                        / (logo_image.height / 48)
-                    ), 48)
+            logo_image.width
+            / (logo_image.height / 48)
+        ), 48)
+
+        if transfer_rendering:
+            logos_image = self.line.logo_image
+
+            transfer_lines = list(self.get_transfer_lines())
+            transfer_lines.sort(key=lambda l: l.map_data.lines.index(l))
+
+            for i, transfer_line in enumerate(transfer_lines):
+                transfer_logo = transfer_line.logo_image
+                transfer_logo.resize(round(
+                    transfer_logo.width
+                    / (transfer_logo.height / 48)
+                ), 48)
+
+                spacing = 16
+                if ((i > 0 and transfer_lines[i - 1].type == "mcd") or (i == 0 and self.line.type == "mcd")) and transfer_line.type == "mcd":
+                    spacing = -10
+
+                temp_image = Image(width=logos_image.width + spacing + transfer_logo.width, height=logos_image.height)
+                place(temp_image, logos_image, (0, 0), RelativeTo.TOP_LEFT)
+                place(temp_image, transfer_logo, (temp_image.width, temp_image.height // 2), RelativeTo.RIGHT)
+                logos_image = temp_image
+            logo_image = logos_image
 
         place(sign_image, logo_image, (32, 64), RelativeTo.LEFT)
 
@@ -122,7 +144,7 @@ class Station(Element):
 
         translit_name = transliterate.translit(self.name, 'ru', reversed=True)
         translit_text_image = get_text_image(translit_name, sign_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
-        place(sign_image, translit_text_image, (48 + logo_image.width, 70), RelativeTo.TOP_LEFT)
+        place(sign_image, translit_text_image, (46 + logo_image.width, 70), RelativeTo.TOP_LEFT)
 
         round_corners(sign_image, 10)
 
