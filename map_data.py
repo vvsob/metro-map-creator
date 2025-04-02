@@ -105,11 +105,6 @@ class Station(Element):
         return transfer_lines
 
     def get_sign_image(self, width, height, transfer_rendering=True):
-        frame_size = 4
-
-        sign_image = Image(width=width - frame_size * 2, height=height - frame_size * 2, background=Color('white'))
-        sign_image.virtual_pixel = 'transparent'
-
         lines = [self.line]
 
         if transfer_rendering:
@@ -138,21 +133,32 @@ class Station(Element):
             else:
                 logos_image = line_logo
 
-        place(sign_image, logos_image, (32, sign_image.height // 2), RelativeTo.LEFT)
-
-        text_image = get_text_image(self.name, sign_image, self.line.map_data.font_path, font_size=30)
-        place(sign_image, text_image, (48 + logos_image.width, sign_image.height // 2), RelativeTo.LEFT_DOWN)
-
+        text_image = get_text_image(self.name, logos_image, self.line.map_data.font_path, font_size=30)
         translit_name = transliterate.translit(self.name, 'ru', reversed=True)
-        translit_text_image = get_text_image(translit_name, sign_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
-        place(sign_image, translit_text_image, (46 + logos_image.width, sign_image.height // 2 + 6), RelativeTo.TOP_LEFT)
+        translit_text_image = get_text_image(translit_name, logos_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
 
+        combined_text_image = Image(width=max(text_image.width, translit_text_image.width), height=max(text_image.height, 6 + translit_text_image.height) * 2)
+        place(combined_text_image, text_image, (0, combined_text_image.height // 2), RelativeTo.LEFT_DOWN)
+        place(combined_text_image, translit_text_image, (0, combined_text_image.height // 2 + 6), RelativeTo.TOP_LEFT)
+
+        content_image = Image(width = logos_image.width + 16 + combined_text_image.width, height=max(logos_image.height, combined_text_image.height))
+        place(content_image, logos_image, (0, content_image.height // 2), RelativeTo.LEFT)
+        place(content_image, combined_text_image, (logos_image.width + 16, content_image.height // 2), RelativeTo.LEFT)
+
+        frame_size = 4
+
+        sign_image = Image(width=width-frame_size * 2, height=height-frame_size * 2, background=Color("#FFFFFFFF"))
+        if content_image.width > sign_image.width or content_image.height > sign_image.height:
+            logging.warning(f"Content overflow for station {self.name} of {self.line.name}")
+        if content_image.width > sign_image.width - 64:
+            logging.info(f"Centered sign for station {self.name} of {self.line.name}")
+            place(sign_image, content_image, (sign_image.width // 2, sign_image.height // 2), RelativeTo.CENTER)
+        else:
+            place(sign_image, content_image, (32, sign_image.height // 2), RelativeTo.LEFT)
         round_corners(sign_image, 10 - frame_size)
 
         frame = Image(width=width, height=height, background=Color('#444450FF'), )
-
         place(frame, sign_image, (frame_size, frame_size), RelativeTo.TOP_LEFT)
-
         round_corners(frame, 10)
 
         return frame
