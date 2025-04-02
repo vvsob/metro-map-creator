@@ -192,17 +192,17 @@ class Line:
             )
         )
 
-        if False:
-            self.logo_image.resize(
-                int(
-                    round(
-                        self.logo_image.width
-                        / (self.logo_image.height / (self.line_image.height * 3))
-                    )
-                    + 0.5
-                ),
-                self.line_image.height * 3,
-            )
+        self.logo_image_resized = Image(self.logo_image)
+        self.logo_image_resized.resize(
+            int(
+                round(
+                    self.logo_image_resized.width
+                    / (self.logo_image_resized.height / (self.line_image.height * 3))
+                )
+                + 0.5
+            ),
+            self.line_image.height * 3,
+        )
 
         self.type = line_json.get("type")
         self.priority = line_json.get("priority")
@@ -498,7 +498,7 @@ class Line:
             if self.start_logo_offset is not None:
                 place(
                     metro_map_image,
-                    self.logo_image,
+                    self.logo_image_resized,
                     [
                         first_station_center[0] + self.start_logo_offset[0],
                         first_station_center[1] + self.start_logo_offset[1],
@@ -512,7 +512,7 @@ class Line:
             if self.end_logo_offset[0] is not None:
                 place(
                     metro_map_image,
-                    self.logo_image,
+                    self.logo_image_resized,
                     [
                         last_station_center[0] + self.end_logo_offset[0],
                         last_station_center[1] + self.end_logo_offset[1],
@@ -576,7 +576,7 @@ class Line:
             transfer_lines = station.get_transfer_lines()
             transfers_length = max(0, 10 * (len(transfer_lines) - 1))
             for line in transfer_lines:
-                transfers_length += line.logo_image.width
+                transfers_length += line.logo_image_resized.width
             stations_transfers_length.append(transfers_length)
 
             if is_top:
@@ -606,7 +606,7 @@ class Line:
         total_width = max(last_top, last_bottom)
 
         direction_image = get_direction_image(
-            self.logo_image, stations[len(stations) - 1].name, self.map_data.font_path
+            self.logo_image_resized, stations[len(stations) - 1].name, self.map_data.font_path
         )
         reverse_direction_image = None
         if not (
@@ -618,7 +618,7 @@ class Line:
             total_width += 20
         if self.bidirectional and not start_station_name == stations[0].name:
             reverse_direction_image = get_direction_image(
-                self.logo_image, stations[0].name, self.map_data.font_path, True
+                self.logo_image_resized, stations[0].name, self.map_data.font_path, True
             )
             total_width += reverse_direction_image.width
 
@@ -688,7 +688,7 @@ class Line:
                 for line in reversed(
                     sorted(station.get_transfer_lines(), key=cmp_to_key(Line.cmp))
                 ):
-                    transfer_logo = line.logo_image
+                    transfer_logo = line.logo_image_resized
                     place(
                         linear_metro_map_image,
                         transfer_logo,
@@ -862,7 +862,7 @@ class MapData:
         )
         cur_top = 0
         for line in self.lines:
-            place(lines_image, line.logo_image, [30, cur_top + 20], RelativeTo.CENTER)
+            place(lines_image, line.logo_image_resized, [30, cur_top + 20], RelativeTo.CENTER)
 
             line.line_image.resize(width=100)
             place(lines_image, line.line_image, [70, cur_top + 20], RelativeTo.LEFT)
