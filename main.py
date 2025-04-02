@@ -67,11 +67,17 @@ def draw_linear_map(args):
 
 def draw_station_sign(args):
     map_data = MapData(json.loads(args.map_data.read()), args.assets)
-    lines = map_data.lines
+
+    if args.all_lines:
+        lines = map_data.lines
+    else:
+        lines = [line for line in map_data.lines if line.name in args.lines]
 
     for i, line in enumerate(lines):
         for element in line.elements:
             if isinstance(element, Station):
+                if not args.all_stations and element.name not in args.stations:
+                    continue
                 station_sign = element.get_sign_image()
                 station_sign.save(
                         filename=os.path.join(
@@ -143,6 +149,25 @@ def main():
     station_parser = subparsers.add_parser(
         "station", parents=[parent_parser], help='Draw the station entrance sign'
     )
+    station_parser.add_argument(
+        "-l",
+        "--lines",
+        action="extend",
+        nargs="+",
+        default=[],
+        help="select the lines to be drawn",
+    )
+    station_parser.add_argument("--all_lines", action="store_true", help="select all lines")
+
+    station_parser.add_argument(
+        "-s",
+        "--stations",
+        action="extend",
+        nargs="+",
+        default=[],
+        help="select the stations to be drawn",
+    )
+    station_parser.add_argument("--all_stations", action="store_true", help="render all stations on selected lines")
     station_parser.add_argument(
         "-o",
         "--output",
