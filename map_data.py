@@ -1,4 +1,7 @@
 import logging
+
+import transliterate
+
 from utilities import *
 from draw_elements import *
 
@@ -101,6 +104,30 @@ class Station(Element):
             transfer_lines.remove(self.line)
         return transfer_lines
 
+    def get_sign_image(self):
+
+        sign_image = Image(width=128*3, height=128, background=Color('white'))
+        sign_image.virtual_pixel = 'transparent'
+
+        logo_image = self.line.logo_image
+        logo_image.resize(round(
+                        logo_image.width
+                        / (logo_image.height / 48)
+                    ), 48)
+
+        place(sign_image, logo_image, (32, 64), RelativeTo.LEFT)
+
+        text_image = get_text_image(self.name, sign_image, self.line.map_data.font_path, font_size=30)
+        place(sign_image, text_image, (48 + logo_image.width, 64), RelativeTo.LEFT_DOWN)
+
+        translit_name = transliterate.translit(self.name, 'ru', reversed=True)
+        translit_text_image = get_text_image(translit_name, sign_image, self.line.map_data.font_path, font_color=Color("gray"), font_size=18)
+        place(sign_image, translit_text_image, (48 + logo_image.width, 70), RelativeTo.TOP_LEFT)
+
+        round_corners(sign_image, 10)
+
+        return sign_image
+
 
 class Line:
     @staticmethod
@@ -142,16 +169,18 @@ class Line:
                 self.map_data.assets_path, "images", line_json.get("logo_filename")
             )
         )
-        self.logo_image.resize(
-            int(
-                round(
-                    self.logo_image.width
-                    / (self.logo_image.height / (self.line_image.height * 3))
-                )
-                + 0.5
-            ),
-            self.line_image.height * 3,
-        )
+
+        if False:
+            self.logo_image.resize(
+                int(
+                    round(
+                        self.logo_image.width
+                        / (self.logo_image.height / (self.line_image.height * 3))
+                    )
+                    + 0.5
+                ),
+                self.line_image.height * 3,
+            )
 
         self.type = line_json.get("type")
         self.priority = line_json.get("priority")

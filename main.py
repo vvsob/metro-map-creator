@@ -65,6 +65,29 @@ def draw_linear_map(args):
     print(f"Rendered {len(lines)} lines")
 
 
+def draw_station_sign(args):
+    map_data = MapData(json.loads(args.map_data.read()), args.assets)
+    lines = map_data.lines
+
+    for i, line in enumerate(lines):
+        for element in line.elements:
+            if isinstance(element, Station):
+                station_sign = element.get_sign_image()
+                station_sign.save(
+                        filename=os.path.join(
+                            args.output,
+                            format_filename(
+                                "sign_"
+                                + line.name
+                                + "_"
+                                + element.name
+                                + ".png"
+                            ),
+                        )
+                    )
+
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="metro-map-creator",
@@ -116,6 +139,18 @@ def main():
         help="name of the output folder",
     )
     linear_parser.set_defaults(func=draw_linear_map)
+
+    station_parser = subparsers.add_parser(
+        "station", parents=[parent_parser], help='Draw the station entrance sign'
+    )
+    station_parser.add_argument(
+        "-o",
+        "--output",
+        default="./output",
+        type=pathlib.Path,
+        help="name of the output folder",
+    )
+    station_parser.set_defaults(func=draw_station_sign)
 
     args = parser.parse_args()
 

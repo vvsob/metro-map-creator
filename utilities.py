@@ -86,6 +86,7 @@ def get_text_image(
     font_path,
     font_color=Color("black"),
     background_color=Color("#FFFFFF80"),
+    font_size=18
 ):
     padding_size = (5, 3)
 
@@ -95,7 +96,7 @@ def get_text_image(
     draw = Drawing()
     draw.fill_color = font_color
     draw.font = font_path
-    draw.font_size = 18
+    draw.font_size = font_size
     res_image = Image(
         width=int(
             draw.get_font_metrics(image, text, multiline=True).text_width
@@ -108,7 +109,7 @@ def get_text_image(
         background=background_color,
     )
     res_image.virtual_pixel = "transparent"
-    draw.text(padding_size[0], 14 + padding_size[1], text)
+    draw.text(padding_size[0], font_size - 4 + padding_size[1], text)
     draw(res_image)
     return res_image
 
